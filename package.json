@@ -1,0 +1,33 @@
+{
+  "name": "discloud.proto",
+  "version": "0.0.1",
+  "description": "NodeJS distributed file cloud prototype",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zharkov-eu/discloud.proto.git"
+  },
+  "author": "Evgeni Zharkov <zharkov.ev.u@yandex.ru>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/zharkov-eu/discloud.proto/issues"
+  },
+  "homepage": "https://github.com/zharkov-eu/discloud.proto#readme",
+  "dependencies": {
+    "bunyan": "^1.8.12",
+    "cassandra-driver": "^3.4.1",
+    "restify": "^7.1.1",
+    "uuid": "^3.2.1",
+    "validation-api": "^0.1.14"
+  },
+  "devDependencies": {
+    "@types/uuid": "^3.4.3",
+    "@types/cassandra-driver": "^3.4.0",
+    "@types/restify": "^5.0.7",
+    "tslint": "^5.9.1",
+    "typescript": "^2.8.1"
+  }
+}

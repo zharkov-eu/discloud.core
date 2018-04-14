@@ -57,3 +57,12 @@ typings/
 # dotenv environment variables file
 .env
 
+# VSCode
+.vs
+
+# IDEA
+.idea
+
+# js / js.map
+*.js
+*.js.map
