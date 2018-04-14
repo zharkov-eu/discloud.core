@@ -4,7 +4,7 @@
   "description": "NodeJS distributed file cloud prototype",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node ./node_modules/mocha/bin/mocha --recursive test"
   },
   "repository": {
     "type": "git",
@@ -19,14 +19,22 @@
   "dependencies": {
     "bunyan": "^1.8.12",
     "cassandra-driver": "^3.4.1",
+    "request": "^2.85.0",
+    "request-promise": "^4.2.2",
     "restify": "^7.1.1",
+    "restify-errors": "^6.0.0",
     "uuid": "^3.2.1",
     "validation-api": "^0.1.14"
   },
   "devDependencies": {
-    "@types/uuid": "^3.4.3",
     "@types/cassandra-driver": "^3.4.0",
+    "@types/mocha": "^5.0.0",
+    "@types/request-promise": "^4.1.41",
     "@types/restify": "^5.0.7",
+    "@types/restify-errors": "^4.3.2",
+    "@types/uuid": "^3.4.3",
+    "mocha": "^5.1.0",
+    "ts-node": "^5.0.1",
     "tslint": "^5.9.1",
     "typescript": "^2.8.1"
   }

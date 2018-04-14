@@ -6,8 +6,8 @@ import CassandraRepository from "./src/repository/cassandra";
 import Router from "./src/router";
 
 const server = restify.createServer({
-    name: "discloud",
-    version: "1.0.0",
+  name: "discloud",
+  version: "1.0.0",
 });
 
 server.acceptable = ["application/json", "application/octet-stream"];
@@ -16,11 +16,19 @@ server.use(restify.plugins.acceptParser(server.acceptable));
 server.use(restify.plugins.queryParser());
 server.use(restify.plugins.bodyParser());
 
-(async () => {
-    const repository = new CassandraRepository();
-    Router(server, repository);
+process.on("uncaughtException", (error) => {
+  logger.error({type: LogType.SYSTEM, error: JSON.stringify(error)}, "uncaughtException");
+});
 
-    server.listen(8000, () => {
-        logger.info({type: LogType.SYSTEM}, `${server.name} listen on port ${server.url}`);
-    });
+process.on("unhandledRejection", (error) => {
+  logger.error({type: LogType.SYSTEM, error: JSON.stringify(error)}, "unhandledRejection");
+});
+
+(async () => {
+  const repository = new CassandraRepository();
+  Router(server, repository);
+
+  server.listen(8000, () => {
+    logger.info({type: LogType.SYSTEM}, `${server.name} listen on port ${server.url}`);
+  });
 })();
