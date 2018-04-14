@@ -51,4 +51,27 @@ export default class UserService {
     );
     return user;
   }
+
+  public async update(username: string, userRequest: IUserRequest): Promise<void> {
+    let updateKeys = Object.keys(userRequest);
+    const updateValues = [];
+    for (const key of Object.keys(userRequest)) {
+      if (userRequest[key] === undefined) {
+        updateKeys = updateKeys.filter((exKey) => exKey !== key);
+      } else {
+        updateValues.push(userRequest[key]);
+      }
+    }
+    const setQuery = updateKeys.map((key) => key + " = ?").join(", ");
+    const query = `UPDATE user SET ${setQuery} WHERE username = ?;`;
+    await this.repository.client.execute(query,
+        [...updateValues, username],
+        {prepare: true},
+    );
+  }
+
+  public async delete(username: string): Promise<void> {
+    const query = "DELETE FROM user WHERE username=?";
+    await this.repository.client.execute(query, [username], {prepare: true});
+  }
 }

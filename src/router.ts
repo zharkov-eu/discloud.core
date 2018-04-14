@@ -12,4 +12,7 @@ export default function Router(server: restify.Server, repository: CassandraRepo
   const userController = new UserController(userService);
 
   server.post("/user", userController.post);
+  server.get("/user/:username", userController.get);
+  server.patch("/user/:username", userController.patch);
+  server.del("/user/:username", userController.del);
 }

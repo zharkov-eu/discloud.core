@@ -3,14 +3,14 @@
 import {NotEmpty, NotEmptyString, Validate} from "validation-api";
 
 export interface IUserRequest {
-  username: string;
+  username?: string;
   group?: string[];
   password?: string;
 }
 
 @Validate({throwable: false})
 export default class UserRequest implements IUserRequest {
-  @NotEmptyString({required: true})
+  @NotEmptyString()
   public username: string;
 
   @NotEmpty()
@@ -19,15 +19,17 @@ export default class UserRequest implements IUserRequest {
   @NotEmptyString()
   public password: string;
 
-  constructor(request: IUserRequest) {
+  constructor(request: IUserRequest, required: IUserRequest = {}) {
     if (!request || typeof request !== "object") {
       throw new Error();
     }
-    this.username = request.username;
-    if (request.group) {
+    if (required.username || request.username) {
+      this.username = request.username;
+    }
+    if (required.group || request.group) {
       this.group = request.group;
     }
-    if (request.password) {
+    if (required.password || request.password) {
       this.password = request.password;
     }
   }
