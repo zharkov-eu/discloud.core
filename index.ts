@@ -1,34 +1,19 @@
 "use strict";
 
-import * as restify from "restify";
-import {logger, LogType} from "./src/logger";
-import CassandraRepository from "./src/repository/cassandra";
-import Router from "./src/router";
+import {RedisClient} from "redis";
+import config from "./config";
+import {logger} from "./src/logger";
+import Node from "./src/node";
 
-const server = restify.createServer({
-  name: "discloud",
-  version: "1.0.0",
+const configRedis = config.redis || {host: "127.0.0.1", port: 6379};
+
+const client = new RedisClient({
+  host: configRedis.host,
+  port: configRedis.port,
 });
 
-server.acceptable = ["application/json", "application/octet-stream"];
-
-server.use(restify.plugins.acceptParser(server.acceptable));
-server.use(restify.plugins.queryParser());
-server.use(restify.plugins.bodyParser());
-
-process.on("uncaughtException", (error) => {
-  logger.error({type: LogType.SYSTEM, error: JSON.stringify(error)}, "uncaughtException");
+client.on("connect", async () => {
+  const node = new Node(client);
+  const uid = await node.register();
+  logger.info("Node started, uid: " + uid);
 });
-
-process.on("unhandledRejection", (error) => {
-  logger.error({type: LogType.SYSTEM, error: JSON.stringify(error)}, "unhandledRejection");
-});
-
-(async () => {
-  const repository = new CassandraRepository();
-  Router(server, repository);
-
-  server.listen(8000, () => {
-    logger.info({type: LogType.SYSTEM}, `${server.name} listen on port ${server.url}`);
-  });
-})();
