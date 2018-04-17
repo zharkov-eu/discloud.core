@@ -3,6 +3,7 @@
 import * as path from "path";
 
 interface IConfig {
+  data: {path: string};
   ipv4: string;
   redis: {host: string, port: number};
 }

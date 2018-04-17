@@ -2,12 +2,14 @@
 
 import {RedisClient} from "redis";
 import {logger} from "./logger";
+import FileService from "./service/fileService";
 import RegistryService from "./service/registryService";
 
 class Node {
   public uid: string;
   public ipv4: string;
   private role: "Master" | "Slave";
+  private fileService: FileService;
   private registryService: RegistryService;
   private updateAliveFieldInt: NodeJS.Timer;
   private checkMasterAliveInt?: NodeJS.Timer;
@@ -15,6 +17,7 @@ class Node {
   private checkNodeMapInt?: NodeJS.Timer;
 
   constructor(client: RedisClient) {
+    this.fileService = new FileService();
     this.registryService = new RegistryService(client);
   }
 
@@ -27,6 +30,7 @@ class Node {
     this.uid = await this.registryService.registerNode(this.ipv4);
     this.updateAliveFieldInt = setInterval(() => this.registryService.updateAliveField(this.uid), 500);
     this.startRoleBehavior();
+    await this.startWorker();
     return this.uid;
   };
 
@@ -49,6 +53,10 @@ class Node {
     } else {
       this.checkMasterAliveInt = setInterval(() => this.checkMasterAlive(), 500);
     }
+  };
+
+  private startWorker = async (): Promise<void> => {
+    await this.fileService.init();
   }
 }
 
