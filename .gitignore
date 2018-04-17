@@ -66,3 +66,6 @@ typings/
 # js / js.map
 *.js
 *.js.map
+
+# .DS_Store
+.DS_Store

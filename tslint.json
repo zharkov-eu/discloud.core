@@ -1,6 +1,7 @@
 {
   "extends": "tslint:recommended",
   "rules": {
+    "arrow-parens": ["ban-single-arg-parens"],
     "no-string-literal": false,
     "semicolon": [
       true,
