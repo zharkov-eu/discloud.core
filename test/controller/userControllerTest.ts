@@ -10,7 +10,7 @@ import {IUserResponse} from "../../src/controller/request/userResponse";
 
 describe("User API test", () => {
   const userRequest: IUserRequest = {
-    group: ["discloud", "developer"],
+    group: [1000, 10010],
     password: "discloudpwd",
     username: "discloud",
   };

@@ -5,7 +5,7 @@ import {IsNumber, NotEmpty, NotEmptyString, Validate, ValidationError} from "val
 export interface IUserRequest {
   id?: number;
   username?: string;
-  group?: string[];
+  group?: number[];
   password?: string;
 }
 
@@ -18,7 +18,7 @@ export default class UserRequest implements IUserRequest {
   public username: string;
 
   @NotEmpty()
-  public group: string[];
+  public group: number[];
 
   @NotEmptyString()
   public password: string;

@@ -4,7 +4,7 @@ import * as restify from "restify";
 import {BadRequestError, ConflictError, NotFoundError} from "restify-errors";
 import UserService from "../service/userService";
 import UserRequest from "./request/userRequest";
-import {IUserResponse} from "./request/userResponse";
+import UserResponse from "./request/userResponse";
 
 export default class UserController {
   private readonly userService: UserService;
@@ -14,16 +14,12 @@ export default class UserController {
   }
 
   public get = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
-    const user = await this.userService.findByUsername(req.params.username);
+    const user = await this.userService.findById(req.params.id);
     if (!user) {
-      return next(new NotFoundError("User '%s' not found", req.params.username));
+      return next(new NotFoundError("User by id {'%s'} not found", req.params.id));
     }
 
-    const userResponse: IUserResponse = {
-      group: user.group,
-      username: user.username,
-    };
-    return res.send(200, userResponse);
+    return res.json(200, new UserResponse(user));
   };
 
   public post = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
@@ -38,11 +34,8 @@ export default class UserController {
     }
 
     const user = await this.userService.save(userRequest);
-    const userResponse: IUserResponse = {
-      group: user.group,
-      username: user.username,
-    };
-    return res.json(201, userResponse, {location: `/user/${user.username}`});
+
+    return res.json(201, new UserResponse(user), {location: `/user/${user.id}`});
   };
 
   public patch = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
@@ -51,26 +44,23 @@ export default class UserController {
       return next(new BadRequestError(userRequest["__validationError"]()));
     }
 
-    const user = await this.userService.findByUsername(userRequest.username);
+    const user = await this.userService.findById(req.params.id);
     if (!user) {
-      return next(new NotFoundError("User '%s' not found", req.params.username));
+      return next(new NotFoundError("User by id {'%s'} not found", req.params.id));
     }
 
-    await this.userService.update(userRequest.username, {...userRequest, username: undefined});
-    const userResponse: IUserResponse = {
-      group: userRequest.group || user.group,
-      username: user.username,
-    };
-    return res.json(200, userResponse);
+    await this.userService.update(req.params.id, {...userRequest, id: undefined});
+
+    return res.json(200, new UserResponse(user));
   };
 
   public del = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
-    const user = await this.userService.findByUsername(req.params.username);
+    const user = await this.userService.findById(req.params.id);
     if (!user) {
-      return next(new NotFoundError("User '%s' not found", req.params.username));
+      return next(new NotFoundError("User by id {'%s'} not found", req.params.id));
     }
 
-    await this.userService.delete(req.params.username);
+    await this.userService.delete(req.params.id);
     return res.send(204);
   };
 }

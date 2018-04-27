@@ -2,75 +2,72 @@
 
 import * as restify from "restify";
 import {BadRequestError, ConflictError, NotFoundError} from "restify-errors";
-import UserService from "../service/userService";
-import UserRequest from "./request/userRequest";
-import {IUserResponse} from "./request/userResponse";
+import GroupService from "../service/groupService";
+import GroupRequest from "./request/groupRequest";
+import GroupResponse from "./request/groupResponse";
 
-export default class UserController {
-  private readonly userService: UserService;
+export default class GroupController {
+  private readonly groupService: GroupService;
 
-  constructor(userService: UserService) {
-    this.userService = userService;
+  constructor(groupService: GroupService) {
+    this.groupService = groupService;
   }
 
+  public getAll = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
+    const groups = await this.groupService.findAll();
+
+    const groupsResponse = groups.map(group => new GroupResponse(group));
+    return res.json(200, groupsResponse);
+  };
+
   public get = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
-    const user = await this.userService.findByUsername(req.params.username);
-    if (!user) {
-      return next(new NotFoundError("User '%s' not found", req.params.username));
+    const group = await this.groupService.findById(req.params.id);
+    if (!group) {
+      return next(new NotFoundError("Group by id {'%s'} not found", req.params.id));
     }
 
-    const userResponse: IUserResponse = {
-      group: user.group,
-      username: user.username,
-    };
-    return res.send(200, userResponse);
+    return res.send(200, new GroupResponse(group));
   };
 
   public post = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
-    const userRequest = new UserRequest(req.body, {username: "required"});
-    if (userRequest["__validationError"] && userRequest["__validationError"]()) {
-      return next(new BadRequestError(userRequest["__validationError"]()));
+    const groupRequest = new GroupRequest(req.body, {name: "required"});
+    if (groupRequest["__validationError"] && groupRequest["__validationError"]()) {
+      return next(new BadRequestError(groupRequest["__validationError"]()));
     }
 
-    const existingUser = await this.userService.findByUsername(userRequest.username);
-    if (existingUser) {
-      return next(new ConflictError("User '%s' already exist", existingUser.username));
+    const existingGroup = await this.groupService.findByName(groupRequest.name);
+    if (existingGroup) {
+      return next(new ConflictError("Group '%s' already exist", existingGroup.name));
     }
 
-    const user = await this.userService.save(userRequest);
-    const userResponse: IUserResponse = {
-      group: user.group,
-      username: user.username,
-    };
-    return res.json(201, userResponse, {location: `/user/${user.username}`});
+    const group = await this.groupService.save(groupRequest);
+
+    return res.json(201, new GroupResponse(group), {location: `/group/${group.id}`});
   };
 
   public patch = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
-    const userRequest = new UserRequest(req.body);
-    if (userRequest["__validationError"] && userRequest["__validationError"]()) {
-      return next(new BadRequestError(userRequest["__validationError"]()));
+    const groupRequest = new GroupRequest(req.body);
+    if (groupRequest["__validationError"] && groupRequest["__validationError"]()) {
+      return next(new BadRequestError(groupRequest["__validationError"]()));
     }
 
-    const user = await this.userService.findByUsername(userRequest.username);
-    if (!user) {
-      return next(new NotFoundError("User '%s' not found", req.params.username));
+    const group = await this.groupService.findById(req.params.id);
+    if (!group) {
+      return next(new NotFoundError("Group by id {'%s'} not found", req.params.id));
     }
 
-    await this.userService.update(userRequest.username, {...userRequest, username: undefined});
-    const userResponse: IUserResponse = {
-      group: userRequest.group || user.group,
-      username: user.username,
-    };
-    return res.json(200, userResponse);
+    await this.groupService.update(req.params.id, {...groupRequest, id: undefined});
+
+    return res.json(200, new GroupResponse(group));
   };
 
   public del = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
-    const user = await this.userService.findByUsername(req.params.username);
-    if (!user) {
-      return next(new NotFoundError("User '%s' not found", req.params.username));
+    const group = await this.groupService.findById(req.params.id);
+    if (!group) {
+      return next(new NotFoundError("Group by id {'%s'} not found", req.params.id));
     }
 
-    await this.userService.delete(req.params.username);
+    await this.groupService.delete(req.params.id);
     return res.send(204);
   };
 }

@@ -1,9 +1,9 @@
 "use strict";
 
 export default interface IUser {
-  id: number; // User ID
+  id: number; // ID пользователя
   username: string; // Username
-  group: string[]; // User Groups
-  password: string; // Hashed password
-  salt: string; // Password salt
+  group: number[]; // Группы пользователя
+  password: string; // Хэшированный пароль
+  salt: string; // Соль пароля
 }
