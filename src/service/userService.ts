@@ -12,6 +12,7 @@ export default class UserService {
   private static convertRow(row: { [key: string]: any }): IUser {
     return {
       group: row.group,
+      id: row.id,
       password: row.password,
       salt: row.salt,
       username: row.username,
@@ -38,8 +39,11 @@ export default class UserService {
     const password = userRequest.password || (await randomBytesAsync(8)).toString("hex");
     const hash = crypto.createHmac("sha512", salt);
     const hashedPassword = hash.update(password).digest().toString("base64");
+    const idQuery = "UPDATE counters SET counter_value = counter_value + 1 WHERE type='user';";
+    const result = await this.repository.client.execute(idQuery);
     const user: IUser = {
       group: Array.isArray(userRequest.group) ? userRequest.group : [],
+      id: result.first().counter_value,
       password: hashedPassword,
       salt,
       username: userRequest.username,

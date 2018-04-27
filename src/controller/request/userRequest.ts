@@ -1,8 +1,9 @@
 "use strict";
 
-import {NotEmpty, NotEmptyString, Validate} from "validation-api";
+import {IsNumber, NotEmpty, NotEmptyString, Validate, ValidationError} from "validation-api";
 
 export interface IUserRequest {
+  id?: number;
   username?: string;
   group?: string[];
   password?: string;
@@ -10,6 +11,9 @@ export interface IUserRequest {
 
 @Validate({throwable: false})
 export default class UserRequest implements IUserRequest {
+  @IsNumber()
+  public id: number;
+
   @NotEmptyString()
   public username: string;
 
@@ -21,7 +25,15 @@ export default class UserRequest implements IUserRequest {
 
   constructor(request: IUserRequest, required: IUserRequest = {}) {
     if (!request || typeof request !== "object") {
-      throw new Error();
+      throw new ValidationError([{
+        constraint: "object",
+        message: "UserRequest not a object",
+        property: undefined,
+        value: undefined,
+      }]);
+    }
+    if (required.id || request.id) {
+      this.id = request.id;
     }
     if (required.username || request.username) {
       this.username = request.username;

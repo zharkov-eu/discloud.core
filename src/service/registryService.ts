@@ -1,12 +1,10 @@
 "use strict";
 
-import * as crypto from "crypto";
 import {RedisClient} from "redis";
 import {promisify} from "util";
+import v4 = require("uuid/v4");
 import config from "../../config";
 import {getNetworkInterfaces} from "../lib/ip";
-
-const randomBytesAsync = promisify(crypto.randomBytes);
 
 class RegistryService {
   private readonly client: RedisClient;
@@ -46,10 +44,11 @@ class RegistryService {
   /**
    * Регистрация ноды
    * @param {string} ipv4
+   * @param {string} uid - Использовать переданный uid для регистрации
    * @return {Promise<string>}
    */
-  public registerNode = async (ipv4: string): Promise<string> => {
-    const uid = (await randomBytesAsync(24)).toString("hex");
+  public registerNode = async (ipv4: string, uid?: string): Promise<string> => {
+    uid = uid || v4();
     const code = await this.hsetnxAsync("node", uid, ipv4);
     return (code !== 1) ? this.registerNode(ipv4) : Promise.resolve(uid);
   };

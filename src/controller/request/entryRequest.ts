@@ -1,6 +1,6 @@
 "use strict";
 
-import {IsMemberOf, NotEmpty, NotEmptyString, Validate, ValidationError} from "validation-api";
+import {IsMemberOf, IsNumber, NotEmpty, NotEmptyString, Validate, ValidationError} from "validation-api";
 import {EntryShare, EntryType} from "../../interface/entry";
 
 export interface IEntryRequest {
@@ -8,8 +8,8 @@ export interface IEntryRequest {
   type?: EntryType;
   parent?: string;
   path?: string;
-  owner?: string;
-  group?: string;
+  owner?: number;
+  group?: number;
   permission?: string;
   share?: EntryShare;
   location?: string[];
@@ -29,11 +29,11 @@ export default class EntryRequest implements IEntryRequest {
   @NotEmptyString()
   public path?: string;
 
-  @NotEmptyString()
-  public owner?: string;
+  @IsNumber()
+  public owner?: number;
 
-  @NotEmptyString()
-  public group?: string;
+  @IsNumber()
+  public group?: number;
 
   @NotEmptyString()
   public permission?: string;
@@ -46,7 +46,7 @@ export default class EntryRequest implements IEntryRequest {
 
   constructor(request: IEntryRequest, required: IEntryRequest = {}) {
     if (!request || typeof request !== "object") {
-      return new ValidationError([{
+      throw new ValidationError([{
         constraint: "object",
         message: "EntryRequest not a object",
         property: undefined,

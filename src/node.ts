@@ -5,6 +5,11 @@ import {logger} from "./logger";
 import FileService from "./service/fileService";
 import RegistryService from "./service/registryService";
 
+interface INodeOptions {
+  uid?: string;
+  ipv4?: string;
+}
+
 class Node {
   public uid: string;
   public ipv4: string;
@@ -16,7 +21,10 @@ class Node {
   private updateMasterAliveInt?: NodeJS.Timer;
   private checkNodeMapInt?: NodeJS.Timer;
 
-  constructor(client: RedisClient) {
+  constructor(client: RedisClient, options: INodeOptions = {}) {
+    this.uid = options.uid;
+    this.ipv4 = options.ipv4;
+
     this.fileService = new FileService();
     this.registryService = new RegistryService(client);
   }
@@ -26,8 +34,8 @@ class Node {
    * @return {Promise<string>}
    */
   public register = async (): Promise<string> => {
-    this.ipv4 = this.registryService.getIPv4();
-    this.uid = await this.registryService.registerNode(this.ipv4);
+    this.ipv4 = this.ipv4 || this.registryService.getIPv4();
+    this.uid = await this.registryService.registerNode(this.ipv4, this.uid);
     this.updateAliveFieldInt = setInterval(() => this.registryService.updateAliveField(this.uid), 500);
     this.startRoleBehavior();
     await this.startWorker();
