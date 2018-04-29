@@ -13,7 +13,7 @@ export default class GroupController {
     this.groupService = groupService;
   }
 
-  public getAll = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
+  public getAll = async (req: restify.Request, res: restify.Response) => {
     const groups = await this.groupService.findAll();
 
     const groupsResponse = groups.map(group => new GroupResponse(group));

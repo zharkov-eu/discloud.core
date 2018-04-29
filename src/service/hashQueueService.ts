@@ -5,7 +5,7 @@ import {promisify} from "util";
 
 let client: RedisClient;
 let hkeysAsync: (key: string) => Promise<string[]>;
-let hdelAsync: (key: string, field: string) => Promise<number>;
+let hdelAsync: (key: string, ...args: string[]) => Promise<number>;
 let hsetAsync: (key: string, field: string, value: any) => Promise<number>;
 
 function initClient(redisClient: RedisClient) {
@@ -16,9 +16,9 @@ function initClient(redisClient: RedisClient) {
 }
 
 class HashQueueService<T> {
+  public readonly hashQueueName: string;
   private readonly uid: string;
   private readonly name: string;
-  private readonly hashQueueName: string;
 
   constructor(redisClient: RedisClient, options: { uid: string, name: string }) {
     initClient(redisClient);

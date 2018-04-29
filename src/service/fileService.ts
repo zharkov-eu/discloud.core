@@ -13,7 +13,7 @@ class FileService {
   }
 
   public init = async (): Promise<void> => {
-    await mkDirRecursive(this.rootPath);
+    // await mkDirRecursive(this.rootPath);
   };
 }
 

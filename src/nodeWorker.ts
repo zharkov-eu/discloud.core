@@ -1,6 +1,7 @@
 "use strict";
 
 import {RedisClient} from "redis";
+import INode from "./interface/node";
 import {logger} from "./logger";
 import FileService from "./service/fileService";
 import RegistryService from "./service/registryService";
@@ -10,10 +11,10 @@ interface INodeOptions {
   ipv4?: string;
 }
 
-class Node {
-  public uid: string;
-  public ipv4: string;
-  private role: "Master" | "Slave";
+class NodeWorker {
+  private uid: string;
+  private ipv4: string;
+  private role: "master" | "slave";
   private fileService: FileService;
   private registryService: RegistryService;
   private updateAliveFieldInt: NodeJS.Timer;
@@ -28,6 +29,10 @@ class Node {
     this.fileService = new FileService();
     this.registryService = new RegistryService(client);
   }
+
+  public getNodeInfo = (): INode => ({uid: this.uid, ipv4: this.ipv4, role: this.role});
+
+  public getRegistryService = (): RegistryService => this.registryService;
 
   /**
    * Регистрация ноды, инициализация интервала обновления alive-поля
@@ -45,16 +50,16 @@ class Node {
   private checkMasterAlive = async (): Promise<void> => {
     const isAlive = await this.registryService.checkMasterAliveField();
     if (!isAlive) {
-      this.role = await this.registryService.masterElection(this.uid) ? "Master" : "Slave";
-      if (this.role === "Master") {
-        logger.info("Node:" + this.uid + " is Master now");
+      this.role = await this.registryService.masterElection(this.uid) ? "master" : "slave";
+      if (this.role === "master") {
+        logger.info("NodeWorker:" + this.uid + " is Master now");
         this.startRoleBehavior();
       }
     }
   };
 
   private startRoleBehavior = (): void => {
-    if (this.role === "Master") {
+    if (this.role === "master") {
       this.checkMasterAliveInt = undefined;
       this.updateMasterAliveInt = setInterval(() => this.registryService.updateMasterAliveField(this.uid), 500);
       this.checkNodeMapInt = setInterval(() => this.registryService.checkNodeMap(), 5000);
@@ -68,4 +73,4 @@ class Node {
   }
 }
 
-export default Node;
+export default NodeWorker;
