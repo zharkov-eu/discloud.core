@@ -2,8 +2,7 @@
 
 import {RedisClient} from "redis";
 import INode from "./interface/node";
-import {logger} from "./logger";
-import FileService from "./service/fileService";
+import {logger, LogType} from "./logger";
 import RegistryService from "./service/registryService";
 
 interface INodeOptions {
@@ -12,21 +11,20 @@ interface INodeOptions {
 }
 
 class NodeWorker {
+  public masterCb?: () => any;
+
   private uid: string;
   private ipv4: string;
   private role: "master" | "slave";
-  private fileService: FileService;
-  private registryService: RegistryService;
   private updateAliveFieldInt: NodeJS.Timer;
   private checkMasterAliveInt?: NodeJS.Timer;
   private updateMasterAliveInt?: NodeJS.Timer;
   private checkNodeMapInt?: NodeJS.Timer;
+  private readonly registryService: RegistryService;
 
   constructor(client: RedisClient, options: INodeOptions = {}) {
     this.uid = options.uid;
     this.ipv4 = options.ipv4;
-
-    this.fileService = new FileService();
     this.registryService = new RegistryService(client);
   }
 
@@ -43,7 +41,6 @@ class NodeWorker {
     this.uid = await this.registryService.registerNode(this.ipv4, this.uid);
     this.updateAliveFieldInt = setInterval(() => this.registryService.updateAliveField(this.uid), 500);
     this.startRoleBehavior();
-    await this.startWorker();
     return this.uid;
   };
 
@@ -52,7 +49,7 @@ class NodeWorker {
     if (!isAlive) {
       this.role = await this.registryService.masterElection(this.uid) ? "master" : "slave";
       if (this.role === "master") {
-        logger.info("NodeWorker:" + this.uid + " is Master now");
+        logger.info({type: LogType.SYSTEM}, "NodeWorker:" + this.uid + " is Master now");
         this.startRoleBehavior();
       }
     }
@@ -63,14 +60,13 @@ class NodeWorker {
       this.checkMasterAliveInt = undefined;
       this.updateMasterAliveInt = setInterval(() => this.registryService.updateMasterAliveField(this.uid), 500);
       this.checkNodeMapInt = setInterval(() => this.registryService.checkNodeMap(), 5000);
+      if (this.masterCb) {
+        this.masterCb();
+      }
     } else {
       this.checkMasterAliveInt = setInterval(() => this.checkMasterAlive(), 500);
     }
   };
-
-  private startWorker = async (): Promise<void> => {
-    await this.fileService.init();
-  }
 }
 
 export default NodeWorker;

@@ -21,7 +21,7 @@ const hgetAsync = promisify(client.hget).bind(client);
 
 client.on("connect", () => {
   const uid = v4();
-  const name = "testHashQueue" + Math.random() * 100;
+  const name = "testHashQueue" + Math.round(Math.random() * 100);
 
   describe("HashQueueServiceTest", () => {
     const hashQueueService = new HashQueueService(client, {uid, name});

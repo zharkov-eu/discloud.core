@@ -5,17 +5,14 @@ import CassandraRepository from "./repository/cassandra";
 
 import NodeWorker from "./nodeWorker";
 import GroupService from "./service/groupService";
-import RegistryService from "./service/registryService";
 import UserService from "./service/userService";
 
 import GroupController from "./controller/groupController";
-import NodeController from "./controller/nodeController";
 import UserController from "./controller/userController";
 
 interface IRouterOptions {
   node: NodeWorker;
   repository: CassandraRepository;
-  registryService: RegistryService;
 }
 
 export function MasterRouter(server: restify.Server, options: IRouterOptions) {
@@ -27,11 +24,7 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
   const userService = new UserService(options.repository);
 
   const groupController = new GroupController(groupService);
-  const nodeController = new NodeController(options.node, options.registryService);
   const userController = new UserController(userService);
-
-  server.get("/node", nodeController.getAll);
-  server.get("/current", nodeController.get);
 
   server.get("/group", groupController.getAll);
   server.post("/group", groupController.post);

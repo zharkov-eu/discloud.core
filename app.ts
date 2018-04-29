@@ -1,49 +1,47 @@
 "use strict";
 
 import * as restify from "restify";
+import INodeConfig from "./src/interface/nodeConfig";
 import {logger, LogType} from "./src/logger";
 import {MasterRouter} from "./src/masterRouter";
+import {NodeRouter} from "./src/nodeRouter";
 import NodeWorker from "./src/nodeWorker";
 import CassandraRepository from "./src/repository/cassandra";
 import RegistryService from "./src/service/registryService";
-import {SlaveRouter} from "./src/slaveRouter";
 
-export async function App(node: NodeWorker, registryService: RegistryService) {
-  const server = restify.createServer({
-    name: "discloud:" + node.getNodeInfo().uid,
-    version: "1.0.0",
-  });
+export class App {
+  private readonly node: NodeWorker;
+  private readonly registryService: RegistryService;
+  private readonly server: restify.Server;
 
-  server.acceptable = ["application/json", "application/octet-stream"];
-
-  server.use(restify.plugins.acceptParser(server.acceptable));
-  server.use(restify.plugins.queryParser());
-  server.use(restify.plugins.bodyParser());
-
-  process.on("uncaughtException", (error) => {
-    logger.error({type: LogType.SYSTEM, error: JSON.stringify(error)}, "uncaughtException");
-  });
-
-  process.on("unhandledRejection", (error) => {
-    logger.error({type: LogType.SYSTEM, error: JSON.stringify(error)}, "unhandledRejection");
-  });
-
-  async function slaveServer() {
-    SlaveRouter(server, {node, registryService});
-
-    server.listen(8000, () => {
-      logger.info({type: LogType.SYSTEM}, `${server.name} listen on port ${server.url}`);
+  constructor(node: NodeWorker, registryService: RegistryService) {
+    this.node = node;
+    this.registryService = registryService;
+    this.server = restify.createServer({
+      name: "discloud:" + node.getNodeInfo().uid,
+      version: "1.0.0",
     });
   }
 
-  async function masterServer() {
+  public startServer = async (config: INodeConfig = {}) => {
+    const port = config.port || 8000;
+
+    this.server.acceptable = ["application/json", "application/octet-stream"];
+
+    this.server.use(restify.plugins.acceptParser(this.server.acceptable));
+    this.server.use(restify.plugins.queryParser());
+    this.server.use(restify.plugins.bodyParser());
+
+    NodeRouter(this.server, {node: this.node, registryService: this.registryService});
+
+    this.server.listen(port, () => {
+      logger.info({type: LogType.SYSTEM}, `${this.server.name} listen on ${this.server.url}`);
+    });
+  };
+
+  public startMasterJob = () => {
     const repository = new CassandraRepository();
-    MasterRouter(server, {node, registryService, repository});
-
-    server.listen(8000, () => {
-      logger.info({type: LogType.SYSTEM}, `${server.name} listen on port ${server.url}`);
-    });
+    MasterRouter(this.server, {node: this.node, repository});
+    logger.info({type: LogType.SYSTEM}, `${this.server.name} server start master job`);
   }
-
-  node.getNodeInfo().role === "master" ? await masterServer() : await slaveServer();
 }

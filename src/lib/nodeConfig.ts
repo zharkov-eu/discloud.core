@@ -1,18 +1,22 @@
 "use strict";
 
 import {isV4Format} from "ip";
-import {NotEmptyString, Validate, ValidationError} from "validation-api";
+import {IsPositiveNumber, NotEmptyString, Validate, ValidationError} from "validation-api";
 import INodeConfig from "../interface/nodeConfig";
 
 const keysAllowed: Map<string, boolean> = new Map([
-  ["uid", true],
   ["bindIp", true],
+  ["port", true],
+  ["uid", true],
 ]);
 
 @Validate()
 export default class NodeConfig implements INodeConfig {
   @NotEmptyString()
   public uid: string;
+
+  @IsPositiveNumber()
+  public port: number;
 
   @NotEmptyString()
   public bindIp: string;
@@ -45,6 +49,9 @@ export default class NodeConfig implements INodeConfig {
 
     if (config.uid) {
       this.uid = config.uid;
+    }
+    if (config.port) {
+      this.port = config.port;
     }
     if (config.bindIp) {
       if (!isV4Format(config.bindIp)) {

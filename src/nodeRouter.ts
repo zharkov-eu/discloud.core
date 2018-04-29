@@ -10,7 +10,7 @@ interface IRouterOptions {
   registryService: RegistryService;
 }
 
-export function SlaveRouter(server: restify.Server, options: IRouterOptions) {
+export function NodeRouter(server: restify.Server, options: IRouterOptions) {
   if (!options || typeof options !== "object") {
     throw new Error("MasterRouter options is not a object");
   }
