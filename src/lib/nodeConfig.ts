@@ -8,6 +8,7 @@ const keysAllowed: Map<string, boolean> = new Map([
   ["bindIp", true],
   ["port", true],
   ["uid", true],
+  ["zone", true],
 ]);
 
 @Validate()
@@ -20,6 +21,9 @@ export default class NodeConfig implements INodeConfig {
 
   @NotEmptyString()
   public bindIp: string;
+
+  @NotEmptyString()
+  public zone: string;
 
   constructor(text: string) {
     let config: INodeConfig;
@@ -63,6 +67,9 @@ export default class NodeConfig implements INodeConfig {
         }]);
       }
       this.bindIp = config.bindIp;
+    }
+    if (config.zone) {
+      this.zone = config.zone;
     }
   }
 }

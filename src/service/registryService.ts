@@ -2,10 +2,11 @@
 
 import {RedisClient} from "redis";
 import {promisify} from "util";
-import v4 = require("uuid/v4");
+import {v4} from "uuid";
 import config from "../../config";
-import INode from "../interface/node";
+import INode, {NodeRoleEnum} from "../interface/node";
 import {getNetworkInterfaces} from "../lib/ip";
+import CassandraRepository from "../repository/cassandra";
 
 let client: RedisClient;
 let getAsync: (key: string) => Promise<string>;
@@ -30,8 +31,24 @@ function initClient(redisClient: RedisClient) {
 }
 
 class RegistryService {
-  constructor(redisClient: RedisClient) {
-    initClient(redisClient);
+  private static convertRow(row: { [key: string]: any }): INode {
+    return {
+      ipv4: row.ipv4,
+      role: row.role,
+      uid: row.uid,
+      zone: row.zone,
+    };
+  }
+
+  private readonly zone: string;
+  private readonly repository: CassandraRepository;
+
+  constructor(redisClient: RedisClient, repository: CassandraRepository, options: { zone: string }) {
+    if (!client) {
+      initClient(redisClient);
+    }
+    this.repository = repository;
+    this.zone = options.zone;
   }
 
   /**
@@ -134,9 +151,40 @@ class RegistryService {
     const master = await getAsync("masterNode");
     const nodes: INode[] = [];
     Object.keys(nodeMap).forEach(uid => {
-      nodes.push({ipv4: nodeMap[uid], role: master.slice(5) === uid ? "master" : "slave", uid});
+      nodes.push({
+        ipv4: nodeMap[uid],
+        role: master.slice(5) === uid ? NodeRoleEnum.MASTER : NodeRoleEnum.SLAVE,
+        uid,
+        zone: this.zone,
+      });
     });
     return nodes;
+  };
+
+  /**
+   * Получение глобального списка нод (по всем зонам)
+   * @return {Promise<INode[]>}
+   */
+  public getAllNodesGlobal = async (): Promise<INode[]> => {
+    const query = "SELECT * FROM node;";
+    const result = await this.repository.client.execute(query, [], {prepare: true});
+    if (result.rowLength === 0) {
+      return undefined;
+    }
+    return result.rows.map(row => RegistryService.convertRow(row));
+  };
+
+  /**
+   * Обновить записи для своей зоны
+   * @return {Promise<void>}
+   */
+  public setNodesGlobal = async (): Promise<void> => {
+    const nodes = await this.getAllNodes();
+    if (nodes.length) {
+      const query = "UPDATE node USING TTL 10 SET ipv4 = ?, role = ? WHERE uid = ? AND zone = ?;";
+      const queries = nodes.map(node => ({query, params: [node.ipv4, node.role, node.uid, node.zone]}));
+      await this.repository.client.batch(queries, {prepare: true});
+    }
   };
 }
 

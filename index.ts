@@ -6,11 +6,13 @@ import {RedisClient} from "redis";
 import {promisify} from "util";
 import {App} from "./app";
 import config from "./config";
+import {NodeRoleEnum} from "./src/interface/node";
 import INodeConfig from "./src/interface/nodeConfig";
 import {mkDirRecursive} from "./src/lib/mkdir";
 import NodeConfig from "./src/lib/nodeConfig";
 import {logger, LogType} from "./src/logger";
 import NodeWorker from "./src/nodeWorker";
+import CassandraRepository from "./src/repository/cassandra";
 
 const statAsync = promisify(fs.stat);
 const readFileAsync = promisify(fs.readFile);
@@ -64,20 +66,34 @@ const rewriteUID = async (nodeConfig: INodeConfig, uid: string): Promise<INodeCo
   return {...nodeConfig, uid};
 };
 
+/**
+ * Старт модели поведения мастера
+ * @param {App} app
+ */
+const masterBehavior = (app: App): void => {
+  app.startMasterJob();
+};
+
 client.on("connect", async () => {
-  let nodeConfig = await loadConfig() || {};
-  const node = new NodeWorker(client, {ipv4: nodeConfig.bindIp, uid: nodeConfig.uid});
+  let nodeConfig: INodeConfig = await loadConfig() || {};
+
+  const repository = new CassandraRepository();
+  const node = new NodeWorker(client, repository, {
+    ipv4: nodeConfig.bindIp,
+    uid: nodeConfig.uid,
+    zone: nodeConfig.zone,
+  });
   const uid = await node.register();
   nodeConfig = await rewriteUID(nodeConfig, uid);
 
-  const app = new App(node, node.getRegistryService());
+  const app = new App(node, node.getRegistryService(), repository);
   logger.info({type: LogType.SYSTEM}, "NodeWorker started, uid: " + uid);
   await app.startServer(nodeConfig);
 
-  if (node.getNodeInfo().role === "master") {
-    app.startMasterJob();
+  if (node.getNodeInfo().role === NodeRoleEnum.MASTER) {
+    masterBehavior(app);
   } else {
-    node.masterCb = () => app.startMasterJob();
+    node.masterCb = () => masterBehavior(app);
   }
 });
 

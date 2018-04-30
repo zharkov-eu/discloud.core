@@ -21,7 +21,9 @@ class HashQueueService<T> {
   private readonly name: string;
 
   constructor(redisClient: RedisClient, options: { uid: string, name: string }) {
-    initClient(redisClient);
+    if (!client) {
+      initClient(redisClient);
+    }
     if (!options && typeof options !== "object") {
       throw new Error("HashQueueService init: options not a object");
     }

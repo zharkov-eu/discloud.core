@@ -1,7 +1,8 @@
 "use strict";
 
 export default interface INodeConfig {
-  bindIp?: string;
-  port?: number;
   uid?: string;
+  port?: number;
+  bindIp?: string;
+  zone?: string;
 }

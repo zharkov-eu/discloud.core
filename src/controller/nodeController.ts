@@ -14,6 +14,11 @@ export default class NodeController {
     this.registryService = registryService;
   }
 
+  public getAllGlobal = async (req: restify.Request, res: restify.Response) => {
+    const nodes = await this.registryService.getAllNodesGlobal();
+    return res.json(200, nodes.map(node => new NodeResponse(node)));
+  };
+
   public getAll = async (req: restify.Request, res: restify.Response) => {
     const nodes = await this.registryService.getAllNodes();
     return res.json(200, nodes.map(node => new NodeResponse(node)));

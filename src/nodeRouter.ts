@@ -17,6 +17,7 @@ export function NodeRouter(server: restify.Server, options: IRouterOptions) {
 
   const nodeController = new NodeController(options.node, options.registryService);
 
-  server.get("/node", nodeController.getAll);
-  server.get("/current", nodeController.get);
+  server.get("/node/global", nodeController.getAllGlobal);
+  server.get("/node/local", nodeController.getAll);
+  server.get("/node/current", nodeController.get);
 }

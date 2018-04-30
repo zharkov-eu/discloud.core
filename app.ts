@@ -12,11 +12,13 @@ import RegistryService from "./src/service/registryService";
 export class App {
   private readonly node: NodeWorker;
   private readonly registryService: RegistryService;
+  private readonly repository: CassandraRepository;
   private readonly server: restify.Server;
 
-  constructor(node: NodeWorker, registryService: RegistryService) {
+  constructor(node: NodeWorker, registryService: RegistryService, repository: CassandraRepository) {
     this.node = node;
     this.registryService = registryService;
+    this.repository = repository;
     this.server = restify.createServer({
       name: "discloud:" + node.getNodeInfo().uid,
       version: "1.0.0",
@@ -40,8 +42,7 @@ export class App {
   };
 
   public startMasterJob = () => {
-    const repository = new CassandraRepository();
-    MasterRouter(this.server, {node: this.node, repository});
+    MasterRouter(this.server, {node: this.node, repository: this.repository});
     logger.info({type: LogType.SYSTEM}, `${this.server.name} server start master job`);
   }
 }
