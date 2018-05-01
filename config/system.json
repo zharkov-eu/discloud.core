@@ -1,6 +1,1 @@
-{
-  "uid": "23b23446-a37e-4dcb-b860-b1f3e1d1c213",
-  "port": 8000,
-  "bindIp": "127.0.0.1",
-  "zone": "local"
-}
+{"uid":"ed17cdf3-3b4e-4321-ad65-aff0ca5f6d72","port":8000,"bindIp":"127.0.0.1","zone":"local"}

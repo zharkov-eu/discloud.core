@@ -30,7 +30,6 @@
   },
   "devDependencies": {
     "@types/cassandra-driver": "^3.4.0",
-    "@types/formidable": "^1.0.31",
     "@types/ip": "0.0.30",
     "@types/mocha": "^5.2.0",
     "@types/redis": "^2.8.6",

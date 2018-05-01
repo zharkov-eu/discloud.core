@@ -28,14 +28,8 @@ export default class GroupRequest implements IGroupRequest {
         value: undefined,
       }]);
     }
-    if (required.id || request.id) {
-      this.id = request.id;
-    }
-    if (required.name || request.name) {
-      this.name = request.name;
-    }
-    if (required.system || request.system) {
-      this.system = request.system;
-    }
+    if (required.id || request.id) this.id = request.id;
+    if (required.name || request.name) this.name = request.name;
+    if (required.system || request.system) this.system = request.system;
   }
 }

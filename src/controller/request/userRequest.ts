@@ -32,17 +32,9 @@ export default class UserRequest implements IUserRequest {
         value: undefined,
       }]);
     }
-    if (required.id || request.id) {
-      this.id = request.id;
-    }
-    if (required.username || request.username) {
-      this.username = request.username;
-    }
-    if (required.group || request.group) {
-      this.group = request.group;
-    }
-    if (required.password || request.password) {
-      this.password = request.password;
-    }
+    if (required.id || request.id) this.id = request.id;
+    if (required.username || request.username) this.username = request.username;
+    if (required.group || request.group) this.group = request.group;
+    if (required.password || request.password) this.password = request.password;
   }
 }

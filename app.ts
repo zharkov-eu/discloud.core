@@ -58,7 +58,11 @@ export class App {
   };
 
   public startMasterJob = () => {
-    MasterRouter(this.server, {node: this.node, repository: this.repository});
+    MasterRouter(this.server, {
+      node: this.node,
+      registryService: this.registryService,
+      repository: this.repository,
+    });
     logger.info({type: LogType.SYSTEM}, `${this.server.name} server start master job`);
   }
 }

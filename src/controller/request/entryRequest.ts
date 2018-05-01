@@ -6,6 +6,7 @@ import {EntryShare, EntryType} from "../../interface/entry";
 export interface IEntryRequest {
   name?: string;
   type?: EntryType;
+  filetype?: string;
   parent?: string;
   path?: string;
   owner?: number;
@@ -22,6 +23,9 @@ export default class EntryRequest implements IEntryRequest {
 
   @IsMemberOf({array: [EntryType.DIRECTORY, EntryType.FILE]})
   public type?: EntryType;
+
+  @NotEmptyString()
+  public filetype?: string;
 
   @NotEmptyString()
   public parent?: string;
@@ -53,5 +57,15 @@ export default class EntryRequest implements IEntryRequest {
         value: undefined,
       }]);
     }
+    if (required.name || request.name) this.name = request.name;
+    if (required.type || request.type) this.type = request.type;
+    if (required.filetype || request.filetype) this.filetype = request.filetype;
+    if (required.parent || request.parent) this.parent = request.parent;
+    if (required.path || request.path) this.path = request.path;
+    if (required.owner || request.owner) this.owner = request.owner;
+    if (required.group || request.group) this.group = request.group;
+    if (required.permission || request.permission) this.permission = request.permission;
+    if (required.share || request.share) this.share = request.share;
+    if (required.location || request.location) this.location = request.location;
   }
 }
