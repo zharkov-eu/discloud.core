@@ -14,6 +14,7 @@ export default interface IEntry {
   username: string; // Username Drive (part of composite key)
   name: string; // Entry Name
   type: EntryType; // Entry type
+  filetype?: string; // File Type
   parent: string; // Parent UUID
   child?: string[]; // Child UUIDs (Only if type = EntryType.DIRECTORY)
   path: string; // Path representation

@@ -19,7 +19,7 @@ CREATE INDEX IF NOT EXISTS group_by_name ON discloud.group (name);
 CREATE TABLE IF NOT EXISTS discloud.user (
     id int PRIMARY KEY,
     username text,
-    group set<text>,
+    group set<int>,
     password text,
     salt text
 );

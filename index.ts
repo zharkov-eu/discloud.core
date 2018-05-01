@@ -13,6 +13,7 @@ import NodeConfig from "./src/lib/nodeConfig";
 import {logger, LogType} from "./src/logger";
 import NodeWorker from "./src/nodeWorker";
 import CassandraRepository from "./src/repository/cassandra";
+import FileService from "./src/service/fileService";
 
 const statAsync = promisify(fs.stat);
 const readFileAsync = promisify(fs.readFile);
@@ -84,9 +85,11 @@ client.on("connect", async () => {
     zone: nodeConfig.zone,
   });
   const uid = await node.register();
+  const fileService = new FileService();
+  await fileService.init();
   nodeConfig = await rewriteUID(nodeConfig, uid);
 
-  const app = new App(node, node.getRegistryService(), repository);
+  const app = new App(node, repository, {fileService, registryService: node.getRegistryService()});
   logger.info({type: LogType.SYSTEM}, "NodeWorker started, uid: " + uid);
   await app.startServer(nodeConfig);
 

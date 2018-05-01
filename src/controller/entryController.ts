@@ -13,19 +13,19 @@ export default class EntryController {
     this.fileService = fileService;
   }
 
-  public get = () => {
-
+  public get = async (req: restify.Request, res: restify.Response) => {
+    return res.json(200, {});
   };
 
-  public post = () => {
-
+  public post = async (req: restify.Request, res: restify.Response) => {
+    return res.json(200, {});
   };
 
-  public patch = () => {
-
+  public patch = async (req: restify.Request, res: restify.Response) => {
+    return res.json(200, {});
   };
 
-  public del = () => {
-
+  public del = async (req: restify.Request, res: restify.Response) => {
+    return res.json(200, {});
   };
 }
