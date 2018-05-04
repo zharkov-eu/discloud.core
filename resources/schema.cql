@@ -24,21 +24,3 @@ CREATE TABLE IF NOT EXISTS discloud.user (
     salt text
 );
 CREATE INDEX IF NOT EXISTS user_by_username ON discloud.user (username);
-CREATE TABLE IF NOT EXISTS discloud.entry (
-    uuid uuid,
-    user int,
-    name text,
-    type text,
-    parent uuid,
-    child set<uuid>,
-    path text,
-    owner int,
-    group int,
-    permission text,
-    created timestamp,
-    last_modify timestamp,
-    share text,
-    location set<text>,
-    location_path text,
-    PRIMARY KEY (uuid, user)
-);

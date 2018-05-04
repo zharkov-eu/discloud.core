@@ -2,10 +2,11 @@
 
 import {v4} from "uuid";
 import {IEntryRequest} from "../controller/request/entryRequest";
+import {NodeUnavailableError} from "../error";
 import IEntry from "../interface/entry";
+import LruCache from "../lib/lruCache";
 import CassandraRepository from "../repository/cassandra";
 import RegistryService from "./registryService";
-import {NodeUnavailableError} from "../error";
 
 export default class EntryService {
   private static convertRow(row: { [key: string]: any }): IEntry {
@@ -24,20 +25,74 @@ export default class EntryService {
       permission: row.permission,
       share: row.share,
       type: row.type,
-      username: row.username,
       uuid: row.uuid,
     };
   }
 
   private readonly repository: CassandraRepository;
   private readonly registryService: RegistryService;
+  private readonly uuidLruCache: LruCache<IEntry>;
+  private readonly pathLruCache: LruCache<IEntry>;
 
   constructor(repository: CassandraRepository, registryService: RegistryService) {
     this.repository = repository;
     this.registryService = registryService;
+    this.uuidLruCache = new LruCache<IEntry>(100);
+    this.pathLruCache = new LruCache<IEntry>(100);
   }
 
-  public async save(entryRequest: IEntryRequest) {
+  public createEntryTable = async (username: string): Promise<void> => {
+    const createTable = `
+      CREATE TABLE IF NOT EXISTS discloud.entry_${username} (
+          uuid uuid PRIMARY KEY,
+          name text,
+          type text,
+          filetype text,
+          parent uuid,
+          child set<uuid>,
+          path text,
+          owner int,
+          group int,
+          permission text,
+          created timestamp,
+          last_modify timestamp,
+          share text,
+          location set<text>,
+          location_path text
+    `;
+    const creatIndex = `CREATE INDEX IF NOT EXISTS entry_${username}_by_path ON discloud.entry_${username} (path);`;
+    await this.repository.client.execute(createTable);
+    await this.repository.client.execute(creatIndex);
+  };
+
+  public getAll = async (username: string): Promise<IEntry[]> => {
+    const query = `SELECT * FROM entry_${username};`;
+    const result = await this.repository.client.execute(query, [], {prepare: true});
+    if (result.rowLength === 0) {
+      return undefined;
+    }
+    return result.rows.map(row => EntryService.convertRow(row));
+  };
+
+  public getByUUID = async (username: string, uuid: string): Promise<IEntry> => {
+    const query = `SELECT * FROM entry_${username} WHERE uuid = ?;`;
+    const result = await this.repository.client.execute(query, [uuid], {prepare: true});
+    if (result.rowLength === 0) {
+      return undefined;
+    }
+    return EntryService.convertRow(result.first());
+  };
+
+  public getByPath = async (username: string, path: string): Promise<IEntry> => {
+    const query = `SELECT * FROM entry_${username} WHERE path = ?;`;
+    const result = await this.repository.client.execute(query, [path], {prepare: true});
+    if (result.rowLength === 0) {
+      return undefined;
+    }
+    return EntryService.convertRow(result.first());
+  };
+
+  public save = async (username: string, entryRequest: IEntryRequest) => {
     const nodesAvailable = await this.checkNodesAvailable(entryRequest.location);
     const nodesUnavailable = Array.from(nodesAvailable.entries())
         .map(item => ({uid: entry[0], alive: entry[1]}))
@@ -61,18 +116,28 @@ export default class EntryService {
       permission: entryRequest.permission,
       share: entryRequest.share,
       type: entryRequest.type,
-      username: "",
       uuid: v4(),
     };
-    const query = "INSERT INTO entry (" +
-        "uuid, username, name, type, parent, child, path, owner, group, permission, share, created, last_modify," +
-        "location, locationPath) VALUES (?);";
+    const query = `INSERT INTO entry_${username} (
+        uuid, name, type, filetype, parent, child, path, owner, group, permission, share, created, last_modify,
+        location, locationPath) VALUES (?);`;
     await this.repository.client.execute(query,
-        [entry.uuid],
+        [entry.uuid, entry.name, entry.type, entry.filetype, entry.parent, entry.child, entry.path,
+          entry.owner, entry.group, entry.permission, entry.share, entry.created, entry.last_modify,
+          entry.location, entry.locationPath],
         {prepare: true},
     );
     return entry;
-  }
+  };
+
+  public deleteByPath = async (username: string, path: string): Promise<IEntry> => {
+    const query = ` * FROM entry_${username} WHERE path = ?;`;
+    const result = await this.repository.client.execute(query, [path], {prepare: true});
+    if (result.rowLength === 0) {
+      return undefined;
+    }
+    return EntryService.convertRow(result.first());
+  };
 
   private checkNodesAvailable = async (uids: string[]): Promise<Map<string, boolean>> => {
     const nodeMap = new Map<string, boolean>();

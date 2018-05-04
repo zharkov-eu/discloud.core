@@ -10,8 +10,7 @@ export enum EntryShare {
 }
 
 export default interface IEntry {
-  uuid: string; // UUID v4 (part of composite key)
-  username: string; // Username Drive (part of composite key)
+  uuid: string; // UUID v4
   name: string; // Entry Name
   type: EntryType; // Entry type
   filetype?: string; // File Type
