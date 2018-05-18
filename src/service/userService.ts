@@ -5,6 +5,7 @@ import {promisify} from "util";
 import {IUserRequest} from "../controller/request/userRequest";
 import IUser from "../interface/user";
 import CassandraRepository from "../repository/cassandra";
+import EntryService from "./entryService";
 
 const randomBytesAsync = promisify(crypto.randomBytes);
 
@@ -20,9 +21,11 @@ export default class UserService {
   }
 
   private readonly repository: CassandraRepository;
+  private readonly entryService: EntryService;
 
-  constructor(repository: CassandraRepository) {
+  constructor(repository: CassandraRepository, entryService: EntryService) {
     this.repository = repository;
+    this.entryService = entryService;
   }
 
   public async findById(id: number): Promise<IUser> {
@@ -48,8 +51,8 @@ export default class UserService {
     const password = userRequest.password || (await randomBytesAsync(8)).toString("hex");
     const hash = crypto.createHmac("sha512", salt);
     const hashedPassword = hash.update(password).digest().toString("base64");
-    const idQuery = "UPDATE counters SET counter_value = counter_value + 1 WHERE type='user';";
-    const idResult = await this.repository.client.execute(idQuery);
+    await this.repository.client.execute("UPDATE counters SET counter_value = counter_value + 1 WHERE type='user';");
+    const idResult = await this.repository.client.execute("SELECT counter_value FROM counters WHERE type='user';");
     const user: IUser = {
       group: Array.isArray(userRequest.group) ? userRequest.group : [],
       id: idResult.first().counter_value,
@@ -62,6 +65,9 @@ export default class UserService {
         [user.id, user.username, user.group, user.password, user.salt],
         {prepare: true},
     );
+
+    await this.entryService.createEntryTable(user.id);
+
     return user;
   }
 

@@ -85,11 +85,11 @@ client.on("connect", async () => {
     zone: nodeConfig.zone,
   });
   const uid = await node.register();
-  const fileService = new FileService();
+  const fileService = new FileService(client, {subService: true});
   await fileService.init();
   nodeConfig = await rewriteUID(nodeConfig, uid);
 
-  const app = new App(node, repository, {fileService, registryService: node.getRegistryService()});
+  const app = new App(node, repository, client, {fileService, registryService: node.getRegistryService()});
   logger.info({type: LogType.SYSTEM}, "NodeWorker started, uid: " + uid);
   await app.startServer(nodeConfig);
 

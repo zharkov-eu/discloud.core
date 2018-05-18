@@ -1,5 +1,6 @@
 "use strict";
 
+import {RedisClient} from "redis";
 import * as restify from "restify";
 import INodeConfig from "./src/interface/nodeConfig";
 import {logger, LogType} from "./src/logger";
@@ -20,13 +21,15 @@ export class App {
   private readonly fileService: FileService;
   private readonly registryService: RegistryService;
   private readonly repository: CassandraRepository;
+  private readonly redisClient: RedisClient;
   private readonly server: restify.Server;
 
-  constructor(node: NodeWorker, repository: CassandraRepository, options: IAppOptions) {
+  constructor(node: NodeWorker, repository: CassandraRepository, redisClient: RedisClient, options: IAppOptions) {
     this.node = node;
     this.fileService = options.fileService;
     this.registryService = options.registryService;
     this.repository = repository;
+    this.redisClient = redisClient;
     this.server = restify.createServer({
       name: "discloud:" + node.getNodeInfo().uid,
       version: "1.0.0",
@@ -60,6 +63,7 @@ export class App {
   public startMasterJob = () => {
     MasterRouter(this.server, {
       node: this.node,
+      redisClient: this.redisClient,
       registryService: this.registryService,
       repository: this.repository,
     });

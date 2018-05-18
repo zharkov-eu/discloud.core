@@ -1,11 +1,14 @@
 "use strict";
 
+import {RedisClient} from "redis";
 import {v4} from "uuid";
 import {IEntryRequest} from "../controller/request/entryRequest";
 import {NodeUnavailableError} from "../error";
 import IEntry from "../interface/entry";
+import IPubEntry from "../interface/pubEntry";
 import LruCache from "../lib/lruCache";
 import CassandraRepository from "../repository/cassandra";
+import PubService from "./pubService";
 import RegistryService from "./registryService";
 
 export default class EntryService {
@@ -30,20 +33,24 @@ export default class EntryService {
   }
 
   private readonly repository: CassandraRepository;
+  private readonly redisClient: RedisClient;
   private readonly registryService: RegistryService;
   private readonly uuidLruCache: LruCache<IEntry>;
   private readonly pathLruCache: LruCache<IEntry>;
+  private readonly pubEntryService: PubService<IPubEntry>;
 
-  constructor(repository: CassandraRepository, registryService: RegistryService) {
+  constructor(repository: CassandraRepository, redisClient: RedisClient, registryService: RegistryService) {
     this.repository = repository;
+    this.redisClient = redisClient;
     this.registryService = registryService;
     this.uuidLruCache = new LruCache<IEntry>(100);
     this.pathLruCache = new LruCache<IEntry>(100);
+    this.pubEntryService = new PubService<IPubEntry>(redisClient, "entry:global");
   }
 
-  public createEntryTable = async (username: string): Promise<void> => {
+  public createEntryTable = async (id: number): Promise<void> => {
     const createTable = `
-      CREATE TABLE IF NOT EXISTS discloud.entry_${username} (
+      CREATE TABLE IF NOT EXISTS discloud.entry_${id} (
           uuid uuid PRIMARY KEY,
           name text,
           type text,
@@ -59,14 +66,14 @@ export default class EntryService {
           share text,
           location set<text>,
           location_path text
-    `;
-    const creatIndex = `CREATE INDEX IF NOT EXISTS entry_${username}_by_path ON discloud.entry_${username} (path);`;
+    );`;
+    const createIndex = `CREATE INDEX IF NOT EXISTS entry_${id}_by_path ON discloud.entry_${id} (path);`;
     await this.repository.client.execute(createTable);
-    await this.repository.client.execute(creatIndex);
+    await this.repository.client.execute(createIndex);
   };
 
-  public getAll = async (username: string): Promise<IEntry[]> => {
-    const query = `SELECT * FROM entry_${username};`;
+  public getAll = async (id: number): Promise<IEntry[]> => {
+    const query = `SELECT * FROM entry_${id};`;
     const result = await this.repository.client.execute(query, [], {prepare: true});
     if (result.rowLength === 0) {
       return undefined;
@@ -74,8 +81,8 @@ export default class EntryService {
     return result.rows.map(row => EntryService.convertRow(row));
   };
 
-  public getByUUID = async (username: string, uuid: string): Promise<IEntry> => {
-    const query = `SELECT * FROM entry_${username} WHERE uuid = ?;`;
+  public getByUUID = async (id: number, uuid: string): Promise<IEntry> => {
+    const query = `SELECT * FROM entry_${id} WHERE uuid = ?;`;
     const result = await this.repository.client.execute(query, [uuid], {prepare: true});
     if (result.rowLength === 0) {
       return undefined;
@@ -83,8 +90,8 @@ export default class EntryService {
     return EntryService.convertRow(result.first());
   };
 
-  public getByPath = async (username: string, path: string): Promise<IEntry> => {
-    const query = `SELECT * FROM entry_${username} WHERE path = ?;`;
+  public getByPath = async (id: number, path: string): Promise<IEntry> => {
+    const query = `SELECT * FROM entry_${id} WHERE path = ?;`;
     const result = await this.repository.client.execute(query, [path], {prepare: true});
     if (result.rowLength === 0) {
       return undefined;
@@ -92,10 +99,10 @@ export default class EntryService {
     return EntryService.convertRow(result.first());
   };
 
-  public save = async (username: string, entryRequest: IEntryRequest) => {
+  public save = async (id: number, entryRequest: IEntryRequest) => {
     const nodesAvailable = await this.checkNodesAvailable(entryRequest.location);
     const nodesUnavailable = Array.from(nodesAvailable.entries())
-        .map(item => ({uid: entry[0], alive: entry[1]}))
+        .map(it => ({uid: it[0], alive: it[1]}))
         .filter(node => !node.alive);
     if (nodesUnavailable.length !== 0) {
       throw new NodeUnavailableError("Nodes " + nodesUnavailable.map(node => node.uid).join(",") + " is unavailable");
@@ -118,20 +125,23 @@ export default class EntryService {
       type: entryRequest.type,
       uuid: v4(),
     };
-    const query = `INSERT INTO entry_${username} (
+    const query = `INSERT INTO entry_${id} (
         uuid, name, type, filetype, parent, child, path, owner, group, permission, share, created, last_modify,
-        location, locationPath) VALUES (?);`;
+        location, location_path) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`;
     await this.repository.client.execute(query,
         [entry.uuid, entry.name, entry.type, entry.filetype, entry.parent, entry.child, entry.path,
           entry.owner, entry.group, entry.permission, entry.share, entry.created, entry.last_modify,
           entry.location, entry.locationPath],
         {prepare: true},
     );
+
+    this.pubEntryService.publish({uuid: entry.uuid, owner: entry.owner, location_set: [], location_path: entry.path});
+
     return entry;
   };
 
-  public deleteByPath = async (username: string, path: string): Promise<IEntry> => {
-    const query = ` * FROM entry_${username} WHERE path = ?;`;
+  public deleteByPath = async (id: number, path: string): Promise<IEntry> => {
+    const query = ` * FROM entry_${id} WHERE path = ?;`;
     const result = await this.repository.client.execute(query, [path], {prepare: true});
     if (result.rowLength === 0) {
       return undefined;

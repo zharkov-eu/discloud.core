@@ -1,5 +1,6 @@
 "use strict";
 
+import {RedisClient} from "redis";
 import * as restify from "restify";
 import CassandraRepository from "./repository/cassandra";
 
@@ -16,6 +17,7 @@ import UserController from "./controller/userController";
 interface IRouterOptions {
   node: NodeWorker;
   repository: CassandraRepository;
+  redisClient: RedisClient;
   registryService: RegistryService;
 }
 
@@ -24,11 +26,11 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
     throw new Error("MasterRouter options is not a object");
   }
 
-  const entryService = new EntryService(options.repository, options.registryService);
+  const entryService = new EntryService(options.repository, options.redisClient, options.registryService);
   const groupService = new GroupService(options.repository);
-  const userService = new UserService(options.repository);
+  const userService = new UserService(options.repository, entryService);
 
-  const entryController = new EntryController(entryService);
+  const entryController = new EntryController(entryService, userService);
   const groupController = new GroupController(groupService);
   const userController = new UserController(userService);
 
