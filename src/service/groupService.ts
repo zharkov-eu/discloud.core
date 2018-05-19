@@ -23,7 +23,7 @@ export default class GroupService {
     const query = "SELECT * FROM group;";
     const result = await this.repository.client.execute(query, [], {prepare: true});
     if (result.rowLength === 0) {
-      return undefined;
+      return [];
     }
     return result.rows.map(row => GroupService.convertRow(row));
   }
@@ -47,37 +47,39 @@ export default class GroupService {
   }
 
   public async save(groupRequest: IGroupRequest): Promise<IGroup> {
-    const idQuery = "UPDATE counters SET counter_value = counter_value + 1 WHERE type='group';";
-    const idResult = await this.repository.client.execute(idQuery);
+    await this.repository.client.execute("UPDATE counters SET counter_value = counter_value + 1 WHERE type='group';");
+    const idResult = await this.repository.client.execute("SELECT counter_value FROM counters WHERE type='group';");
+
     const group: IGroup = {
       id: idResult.first().counter_value,
       name: groupRequest.name,
       system: groupRequest.system,
     };
+
     const query = "INSERT INTO group (id, name, system) VALUES (?,?,?);";
     await this.repository.client.execute(query,
         [group.id, group.name, group.system],
         {prepare: true},
     );
+
     return group;
   }
 
-  public async update(id: number, groupRequest: IGroupRequest): Promise<void> {
+  public async update(id: number, groupRequest: IGroupRequest): Promise<IGroup> {
     let updateKeys = Object.keys(groupRequest);
     const updateValues = [];
     for (const key of Object.keys(groupRequest)) {
-      if (groupRequest[key] === undefined) {
-        updateKeys = updateKeys.filter((exKey) => exKey !== key);
-      } else {
-        updateValues.push(groupRequest[key]);
-      }
+      if (groupRequest[key] === undefined) updateKeys = updateKeys.filter((exKey) => exKey !== key);
+      else updateValues.push(groupRequest[key]);
     }
     const setQuery = updateKeys.map((key) => key + " = ?").join(", ");
     const query = `UPDATE group SET ${setQuery} WHERE id = ?;`;
+
     await this.repository.client.execute(query,
         [...updateValues, id],
         {prepare: true},
     );
+    return this.findById(id);
   }
 
   public async delete(id: number): Promise<void> {

@@ -56,9 +56,9 @@ export default class GroupController {
       return next(new NotFoundError("Group by id {'%s'} not found", req.params.id));
     }
 
-    await this.groupService.update(req.params.id, {...groupRequest, id: undefined});
+    const groupUpdated = await this.groupService.update(req.params.id, {...groupRequest, id: undefined});
 
-    return res.json(200, new GroupResponse(group));
+    return res.json(200, new GroupResponse(groupUpdated));
   };
 
   public del = async (req: restify.Request, res: restify.Response, next: restify.Next) => {

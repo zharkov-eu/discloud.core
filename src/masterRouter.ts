@@ -28,7 +28,7 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
 
   const entryService = new EntryService(options.repository, options.redisClient, options.registryService);
   const groupService = new GroupService(options.repository);
-  const userService = new UserService(options.repository, entryService);
+  const userService = new UserService(options.repository, entryService, groupService);
 
   const entryController = new EntryController(entryService, userService);
   const groupController = new GroupController(groupService);

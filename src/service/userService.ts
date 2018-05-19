@@ -1,11 +1,13 @@
 "use strict";
 
 import * as crypto from "crypto";
+import {NotFoundError} from "restify-errors";
 import {promisify} from "util";
 import {IUserRequest} from "../controller/request/userRequest";
 import IUser from "../interface/user";
 import CassandraRepository from "../repository/cassandra";
 import EntryService from "./entryService";
+import GroupService from "./groupService";
 
 const randomBytesAsync = promisify(crypto.randomBytes);
 
@@ -22,10 +24,12 @@ export default class UserService {
 
   private readonly repository: CassandraRepository;
   private readonly entryService: EntryService;
+  private readonly groupService: GroupService;
 
-  constructor(repository: CassandraRepository, entryService: EntryService) {
+  constructor(repository: CassandraRepository, entryService: EntryService, groupService: GroupService) {
     this.repository = repository;
     this.entryService = entryService;
+    this.groupService = groupService;
   }
 
   public async findById(id: number): Promise<IUser> {
@@ -47,19 +51,22 @@ export default class UserService {
   }
 
   public async save(userRequest: IUserRequest) {
-    const salt = (await randomBytesAsync(24)).toString("hex");
-    const password = userRequest.password || (await randomBytesAsync(8)).toString("hex");
-    const hash = crypto.createHmac("sha512", salt);
-    const hashedPassword = hash.update(password).digest().toString("base64");
+    const groups = Array.isArray(userRequest.group) ? userRequest.group : [];
+    await this.checkGroupsThrowable(groups);
+
     await this.repository.client.execute("UPDATE counters SET counter_value = counter_value + 1 WHERE type='user';");
     const idResult = await this.repository.client.execute("SELECT counter_value FROM counters WHERE type='user';");
+
+    const password = await this.createPasswordHash(userRequest.password);
+
     const user: IUser = {
-      group: Array.isArray(userRequest.group) ? userRequest.group : [],
+      group: groups,
       id: idResult.first().counter_value,
-      password: hashedPassword,
-      salt,
+      password: password.hashedPassword,
+      salt: password.salt,
       username: userRequest.username,
     };
+
     const query = "INSERT INTO user (id, username, group, password, salt) VALUES (?,?,?,?,?);";
     await this.repository.client.execute(query,
         [user.id, user.username, user.group, user.password, user.salt],
@@ -75,14 +82,26 @@ export default class UserService {
     let updateKeys = Object.keys(userRequest);
     const updateValues = [];
     for (const key of Object.keys(userRequest)) {
-      if (["id"].indexOf(key) !== -1 || userRequest[key] === undefined) {
-        updateKeys = updateKeys.filter((exKey) => exKey !== key);
-      } else {
-        updateValues.push(userRequest[key]);
-      }
+      if (userRequest[key] === undefined) updateKeys = updateKeys.filter((exKey) => exKey !== key);
+      else updateValues.push(userRequest[key]);
     }
+
+    if (updateKeys.indexOf("group") !== -1) {
+      const pointer = updateKeys.indexOf("group");
+      await this.checkGroupsThrowable(updateValues[pointer]);
+    }
+
+    if (updateKeys.indexOf("password") !== -1) {
+      const pointer = updateKeys.indexOf("password");
+      const password = await this.createPasswordHash(updateValues[pointer]);
+      updateValues[pointer] = password.hashedPassword;
+      updateKeys.push("salt");
+      updateValues.push(password.salt);
+    }
+
     const setQuery = updateKeys.map((key) => key + " = ?").join(", ");
     const query = `UPDATE user SET ${setQuery} WHERE username = ?;`;
+
     await this.repository.client.execute(query,
         [...updateValues, id],
         {prepare: true},
@@ -93,4 +112,19 @@ export default class UserService {
     const query = "DELETE FROM user WHERE username=?";
     await this.repository.client.execute(query, [username], {prepare: true});
   }
+
+  private createPasswordHash = async (password: string = ""): Promise<{hashedPassword: string, salt: string}> => {
+    const salt = (await randomBytesAsync(24)).toString("hex");
+    password = password || (await randomBytesAsync(8)).toString("hex");
+    const hash = crypto.createHmac("sha512", salt);
+    const hashedPassword = hash.update(password).digest().toString("base64");
+    return {hashedPassword, salt};
+  };
+
+  private checkGroupsThrowable = async (groups: number[]): Promise<void> => {
+    const groupsExists = await Promise.all(groups.map(groupId => this.groupService.findById(groupId)));
+    if (groupsExists.filter(it => it === undefined).length) {
+      throw new NotFoundError("Groups %s not exists", groupsExists.filter(it => it === undefined).toString());
+    }
+  };
 }
