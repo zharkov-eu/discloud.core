@@ -18,9 +18,7 @@ export const mkDirRecursive = async (directory, mode = 0o777) => {
         break;
       default:
         const stats = await statAsync(directory);
-        if (!stats.isDirectory()) {
-          throw error;
-        }
+        if (!stats.isDirectory()) throw error;
         break;
     }
   }

@@ -13,6 +13,7 @@ import UserService from "./service/userService";
 import EntryController from "./controller/entryController";
 import GroupController from "./controller/groupController";
 import UserController from "./controller/userController";
+import asyncWrapper from "./lib/asyncWrapper";
 
 interface IRouterOptions {
   node: NodeWorker;
@@ -26,34 +27,39 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
     throw new Error("MasterRouter options is not a object");
   }
 
-  const entryService = new EntryService(options.repository, options.redisClient, options.registryService);
   const groupService = new GroupService(options.repository);
-  const userService = new UserService(options.repository, entryService, groupService);
+  const userService = new UserService(options.repository, groupService);
+  const entryService = new EntryService(options.repository, options.redisClient,
+      options.registryService, groupService, userService);
 
   const entryController = new EntryController(entryService, userService);
   const groupController = new GroupController(groupService);
   const userController = new UserController(userService);
 
-  server.post("/entry/:userid/", entryController.post);
+  const addRoute = (method: string, path: string, fun: (req, res, next) => any) => {
+    server[method](path, asyncWrapper(fun));
+  };
 
-  server.get("/entry/:userid/entry", entryController.getEntries);
-  server.get("/entry/:userid/entry/:entryuid", entryController.getEntry);
-  server.patch("/entry/:userid/entry/:entryuid", entryController.patchEntry);
-  server.del("/entry/:userid/entry/:entryuid", entryController.delEntry);
+  addRoute("post", "/entry/:userid/", entryController.post);
 
-  server.get("/entry/:userid/path", entryController.getPaths);
-  server.get("/entry/:userid/path/:path", entryController.getPath);
-  server.patch("/entry/:userid/path/:path", entryController.patchPath);
-  server.del("/entry/:userid/path/:path", entryController.delPath);
+  addRoute("get", "/entry/:userid/entry", entryController.getEntries);
+  addRoute("get", "/entry/:userid/entry/:entryuid", entryController.getEntry);
+  addRoute("patch", "/entry/:userid/entry/:entryuid", entryController.patchEntry);
+  addRoute("del", "/entry/:userid/entry/:entryuid", entryController.delEntry);
 
-  server.get("/group", groupController.getAll);
-  server.post("/group", groupController.post);
-  server.get("/group/:id", groupController.get);
-  server.patch("/group/:id", groupController.patch);
-  server.del("/group/:id", groupController.del);
+  addRoute("get", "/entry/:userid/path", entryController.getPaths);
+  addRoute("get", "/entry/:userid/path/:path", entryController.getPath);
+  addRoute("patch", "/entry/:userid/path/:path", entryController.patchPath);
+  addRoute("del", "/entry/:userid/path/:path", entryController.delPath);
 
-  server.post("/user", userController.post);
-  server.get("/user/:id", userController.get);
-  server.patch("/user/:id", userController.patch);
-  server.del("/user/:id", userController.del);
+  addRoute("get", "/group", groupController.getAll);
+  addRoute("post", "/group", groupController.post);
+  addRoute("get", "/group/:id", groupController.get);
+  addRoute("patch", "/group/:id", groupController.patch);
+  addRoute("del", "/group/:id", groupController.del);
+
+  addRoute("post", "/user", userController.post);
+  addRoute("get", "/user/:id", userController.get);
+  addRoute("patch", "/user/:id", userController.patch);
+  addRoute("del", "/user/:id", userController.del);
 }

@@ -1,6 +1,7 @@
 "use strict";
 
 import {RedisClient} from "redis";
+import {NotFoundError} from "restify-errors";
 import {v4} from "uuid";
 import {IEntryRequest} from "../controller/request/entryRequest";
 import {NodeUnavailableError} from "../error";
@@ -8,17 +9,21 @@ import IEntry from "../interface/entry";
 import IPubEntry from "../interface/pubEntry";
 import LruCache from "../lib/lruCache";
 import CassandraRepository from "../repository/cassandra";
+import GroupService from "./groupService";
 import PubService from "./pubService";
 import RegistryService from "./registryService";
+import UserService from "./userService";
 
 export default class EntryService {
+  private static DELIMITER = ":::";
+
   private static convertRow(row: { [key: string]: any }): IEntry {
     return {
       child: row.child,
       created: row.created,
       filetype: row.filetype,
       group: row.group,
-      last_modify: row.last_modify,
+      lastModify: row.last_modify,
       location: row.location,
       locationPath: row.locationPath,
       name: row.name,
@@ -35,42 +40,23 @@ export default class EntryService {
   private readonly repository: CassandraRepository;
   private readonly redisClient: RedisClient;
   private readonly registryService: RegistryService;
+  private readonly groupService: GroupService;
+  private readonly userService: UserService;
   private readonly uuidLruCache: LruCache<IEntry>;
   private readonly pathLruCache: LruCache<IEntry>;
   private readonly pubEntryService: PubService<IPubEntry>;
 
-  constructor(repository: CassandraRepository, redisClient: RedisClient, registryService: RegistryService) {
+  constructor(repository: CassandraRepository, redisClient: RedisClient,
+              registryService: RegistryService, groupService: GroupService, userService: UserService) {
     this.repository = repository;
     this.redisClient = redisClient;
     this.registryService = registryService;
+    this.userService = userService;
+    this.groupService = groupService;
     this.uuidLruCache = new LruCache<IEntry>(100);
     this.pathLruCache = new LruCache<IEntry>(100);
     this.pubEntryService = new PubService<IPubEntry>(redisClient, "entry:global");
   }
-
-  public createEntryTable = async (id: number): Promise<void> => {
-    const createTable = `
-      CREATE TABLE IF NOT EXISTS discloud.entry_${id} (
-          uuid uuid PRIMARY KEY,
-          name text,
-          type text,
-          filetype text,
-          parent uuid,
-          child set<uuid>,
-          path text,
-          owner int,
-          group int,
-          permission text,
-          created timestamp,
-          last_modify timestamp,
-          share text,
-          location set<text>,
-          location_path text
-    );`;
-    const createIndex = `CREATE INDEX IF NOT EXISTS entry_${id}_by_path ON discloud.entry_${id} (path);`;
-    await this.repository.client.execute(createTable);
-    await this.repository.client.execute(createIndex);
-  };
 
   public getAll = async (id: number): Promise<IEntry[]> => {
     const query = `SELECT * FROM entry_${id};`;
@@ -107,15 +93,24 @@ export default class EntryService {
     if (nodesUnavailable.length !== 0) {
       throw new NodeUnavailableError("Nodes " + nodesUnavailable.map(node => node.uid).join(",") + " is unavailable");
     }
+    const locationSet = Array.from(nodesAvailable.entries()).map(it => it[0] + EntryService.DELIMITER + "0");
+
+    const user = this.userService.findById(entryRequest.owner);
+    if (!user) throw new NotFoundError("Owner: user {%s} not found", entryRequest.owner);
+
+    const group = this.groupService.findById(entryRequest.group);
+    if (!group) throw new NotFoundError("Group: group {%s} not found", entryRequest.group);
+
+    const locationPath = [id, entryRequest.path, entryRequest.name].join("/").replace(/\/+/g, "/");
 
     const timestamp = new Date().getTime();
     const entry: IEntry = {
       child: [],
       created: timestamp,
       group: entryRequest.group,
-      last_modify: timestamp,
-      location: entryRequest.location,
-      locationPath: "",
+      lastModify: timestamp,
+      location: locationSet,
+      locationPath,
       name: entryRequest.name,
       owner: entryRequest.owner,
       parent: entryRequest.parent,
@@ -130,12 +125,14 @@ export default class EntryService {
         location, location_path) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`;
     await this.repository.client.execute(query,
         [entry.uuid, entry.name, entry.type, entry.filetype, entry.parent, entry.child, entry.path,
-          entry.owner, entry.group, entry.permission, entry.share, entry.created, entry.last_modify,
+          entry.owner, entry.group, entry.permission, entry.share, entry.created, entry.lastModify,
           entry.location, entry.locationPath],
         {prepare: true},
     );
 
-    this.pubEntryService.publish({uuid: entry.uuid, owner: entry.owner, location_set: [], location_path: entry.path});
+    this.pubEntryService.publish({
+      location_path: entry.locationPath, location_set: locationSet, owner: entry.owner, uuid: entry.uuid,
+    });
 
     return entry;
   };

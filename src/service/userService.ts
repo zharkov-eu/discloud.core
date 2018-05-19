@@ -23,12 +23,10 @@ export default class UserService {
   }
 
   private readonly repository: CassandraRepository;
-  private readonly entryService: EntryService;
   private readonly groupService: GroupService;
 
-  constructor(repository: CassandraRepository, entryService: EntryService, groupService: GroupService) {
+  constructor(repository: CassandraRepository, groupService: GroupService) {
     this.repository = repository;
-    this.entryService = entryService;
     this.groupService = groupService;
   }
 
@@ -73,12 +71,12 @@ export default class UserService {
         {prepare: true},
     );
 
-    await this.entryService.createEntryTable(user.id);
+    await this.createEntryTable(user.id);
 
     return user;
   }
 
-  public async update(id: number, userRequest: IUserRequest): Promise<void> {
+  public async update(id: number, userRequest: IUserRequest): Promise<IUser> {
     let updateKeys = Object.keys(userRequest);
     const updateValues = [];
     for (const key of Object.keys(userRequest)) {
@@ -100,16 +98,18 @@ export default class UserService {
     }
 
     const setQuery = updateKeys.map((key) => key + " = ?").join(", ");
-    const query = `UPDATE user SET ${setQuery} WHERE username = ?;`;
+    const query = `UPDATE user SET ${setQuery} WHERE id = ?;`;
 
     await this.repository.client.execute(query,
         [...updateValues, id],
         {prepare: true},
     );
+
+    return this.findById(id);
   }
 
   public async delete(username: string): Promise<void> {
-    const query = "DELETE FROM user WHERE username=?";
+    const query = "DELETE FROM user WHERE id=?";
     await this.repository.client.execute(query, [username], {prepare: true});
   }
 
@@ -122,9 +122,34 @@ export default class UserService {
   };
 
   private checkGroupsThrowable = async (groups: number[]): Promise<void> => {
-    const groupsExists = await Promise.all(groups.map(groupId => this.groupService.findById(groupId)));
-    if (groupsExists.filter(it => it === undefined).length) {
-      throw new NotFoundError("Groups %s not exists", groupsExists.filter(it => it === undefined).toString());
+    const groupsExists = await Promise.all(groups.map(async id => ([id, await this.groupService.findById(id)])));
+    const groupsNotExists = groupsExists.filter(it => it[1] === undefined).map(it => it[0]);
+    if (groupsNotExists.length) {
+      throw new NotFoundError("Groups %s not exists", groupsNotExists.toString());
     }
+  };
+
+  private createEntryTable = async (id: number): Promise<void> => {
+    const createTable = `
+      CREATE TABLE IF NOT EXISTS discloud.entry_${id} (
+          uuid uuid PRIMARY KEY,
+          name text,
+          type text,
+          filetype text,
+          parent uuid,
+          child set<uuid>,
+          path text,
+          owner int,
+          group int,
+          permission text,
+          created timestamp,
+          last_modify timestamp,
+          share text,
+          location set<text>,
+          location_path text
+    );`;
+    const createIndex = `CREATE INDEX IF NOT EXISTS entry_${id}_by_path ON discloud.entry_${id} (path);`;
+    await this.repository.client.execute(createTable);
+    await this.repository.client.execute(createIndex);
   };
 }

@@ -42,7 +42,7 @@ export default class GroupController {
 
     const group = await this.groupService.save(groupRequest);
 
-    return res.json(201, new GroupResponse(group), {location: `/group/${group.id}`});
+    return res.json(201, new GroupResponse(group), {Location: `/group/${group.id}`});
   };
 
   public patch = async (req: restify.Request, res: restify.Response, next: restify.Next) => {

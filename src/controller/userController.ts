@@ -35,7 +35,7 @@ export default class UserController {
 
     const user = await this.userService.save(userRequest);
 
-    return res.json(201, new UserResponse(user), {location: `/user/${user.id}`});
+    return res.json(201, new UserResponse(user), {Location: `/user/${user.id}`});
   };
 
   public patch = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
@@ -49,9 +49,9 @@ export default class UserController {
       return next(new NotFoundError("User by id {'%s'} not found", req.params.id));
     }
 
-    await this.userService.update(req.params.id, {...userRequest, id: undefined});
+    const userUpdated = await this.userService.update(req.params.id, {...userRequest, id: undefined});
 
-    return res.json(200, new UserResponse(user));
+    return res.json(200, new UserResponse(userUpdated));
   };
 
   public del = async (req: restify.Request, res: restify.Response, next: restify.Next) => {

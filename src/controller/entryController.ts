@@ -1,11 +1,11 @@
 "use strict";
 
 import * as restify from "restify";
-import {BadRequestError} from "restify-errors";
+import {BadRequestError, NotFoundError} from "restify-errors";
 import EntryService from "../service/entryService";
 import UserService from "../service/userService";
 import EntryRequest from "./request/entryRequest";
-import EntryResponse from "./request/entryResponse";
+import EntryResponse, {IEntryResponseOptions} from "./request/entryResponse";
 
 export default class EntryController {
   private readonly entryService: EntryService;
@@ -48,10 +48,15 @@ export default class EntryController {
       return next(new BadRequestError(entryRequest["__validationError"]()));
     }
 
-    const user = await this.userService.findById(entryRequest.owner);
-    const entry = await this.entryService.save(user.id, entryRequest);
+    const user = await this.userService.findById(req.params.userid);
+    if (!user) throw new NotFoundError("User {%s} not found", req.params.userid);
 
-    return res.json(201, {}, {location: `/upload/${entry.uuid}`});
+    const entry = await this.entryService.save(user.id, entryRequest);
+    const entryResponseOptions: IEntryResponseOptions = {
+      upload: `/upload/${req.params.userid}/${entry.uuid}`,
+    };
+
+    return res.json(201, new EntryResponse(entry, entryResponseOptions), {Location: entryResponseOptions.upload});
   };
 
   public patchEntry = async (req: restify.Request, res: restify.Response) => {

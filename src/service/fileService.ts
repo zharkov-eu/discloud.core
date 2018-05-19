@@ -28,15 +28,12 @@ class FileService {
 
   public getRootPath = () => this.rootPath;
 
-  public init = async () => new Promise((resolve, reject) => {
-    statAsync(this.rootPath)
-        .then(
-            (result) => result.isDirectory() ? Promise.resolve() : Promise.reject("RootPath not a directory"),
-            () => mkDirRecursive(this.rootPath),
-        )
-        .then(() => resolve())
-        .catch((err) => reject(err));
-  });
+  public getTempPath = () => [this.rootPath, "tmp"].join(path.sep);
+
+  public init = async () => {
+    await this.createDirectory(this.getRootPath());
+    await this.createDirectory(this.getTempPath());
+  };
 
   public unsubscribeListener = () => {
     this.subEntryService.unsubscribe();
@@ -50,6 +47,16 @@ class FileService {
     });
     await Promise.all(renameFilePromises);
   };
+
+  private createDirectory = (dirPath: string) => new Promise((resolve, reject) => {
+    statAsync(dirPath)
+        .then(
+            (result) => result.isDirectory() ? Promise.resolve() : Promise.reject("RootPath not a directory"),
+            () => mkDirRecursive(this.rootPath),
+        )
+        .then(() => resolve())
+        .catch((err) => reject(err));
+  })
 }
 
 export default FileService;
