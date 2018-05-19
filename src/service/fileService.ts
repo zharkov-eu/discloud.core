@@ -2,12 +2,12 @@
 
 import * as fs from "fs";
 import * as path from "path";
-import {RedisClient} from "redis";
 import * as restify from "restify";
 import {promisify} from "util";
 import config from "../../config";
 import IPubEntry from "../interface/pubEntry";
 import {mkDirRecursive} from "../lib/mkdir";
+import {logger} from "../logger";
 import SubService from "./subService";
 
 const statAsync = promisify(fs.stat);
@@ -15,21 +15,15 @@ const renameAsync = promisify(fs.rename);
 
 const DEFAULT_PATH = path.join("data");
 
-interface IFileServiceOptions {
-  subService?: boolean;
-}
-
 class FileService {
   private readonly rootPath: string;
   private readonly subEntryService: SubService<IPubEntry>;
 
-  constructor(redisClient: RedisClient, options: IFileServiceOptions = {}) {
+  constructor() {
     this.rootPath = config.data && config.data.path ? config.data.path : DEFAULT_PATH;
-    if (options.subService) {
-      // this.subEntryService = new SubService<IPubEntry>(redisClient, "entry:global", (message: IPubEntry) => {
-      //   console.log(message);
-      // });
-    }
+    this.subEntryService = new SubService<IPubEntry>("entry:global", (message: IPubEntry) => {
+      logger.info(message);
+    });
   }
 
   public getRootPath = () => this.rootPath;
@@ -43,6 +37,10 @@ class FileService {
         .then(() => resolve())
         .catch((err) => reject(err));
   });
+
+  public unsubscribeListener = () => {
+    this.subEntryService.unsubscribe();
+  };
 
   public saveFile = async (req: restify.Request, options: { user: string }) => {
     const renameFilePromises = [];

@@ -3,6 +3,7 @@
   "rules": {
     "arrow-parens": ["ban-single-arg-parens"],
     "no-string-literal": false,
+    "no-console": false,
     "curly": false,
     "semicolon": [
       true,

@@ -11,9 +11,13 @@ import CassandraRepository from "./src/repository/cassandra";
 import FileService from "./src/service/fileService";
 import RegistryService from "./src/service/registryService";
 
-interface IAppOptions {
+interface IAppServices {
   fileService: FileService;
   registryService: RegistryService;
+}
+
+interface IAppOptions {
+  port?: number;
 }
 
 export class App {
@@ -24,10 +28,10 @@ export class App {
   private readonly redisClient: RedisClient;
   private readonly server: restify.Server;
 
-  constructor(node: NodeWorker, repository: CassandraRepository, redisClient: RedisClient, options: IAppOptions) {
+  constructor(node: NodeWorker, repository: CassandraRepository, redisClient: RedisClient, services: IAppServices) {
     this.node = node;
-    this.fileService = options.fileService;
-    this.registryService = options.registryService;
+    this.fileService = services.fileService;
+    this.registryService = services.registryService;
     this.repository = repository;
     this.redisClient = redisClient;
     this.server = restify.createServer({
@@ -36,8 +40,8 @@ export class App {
     });
   }
 
-  public startServer = async (config: INodeConfig = {}) => {
-    const port = config.port || 8000;
+  public startServer = async (config: INodeConfig = {}, options: IAppOptions = {}) => {
+    const port = options.port || config.port || 8000;
 
     this.server.acceptable = ["application/json", "application/octet-stream"];
 
