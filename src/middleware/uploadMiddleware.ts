@@ -4,7 +4,7 @@ import * as restify from "restify";
 import {NotFoundError, UnprocessableEntityError} from "restify-errors";
 import LocationStatus from "../interface/locationStatus";
 import CassandraRepository from "../repository/cassandra";
-import EntryService from "../service/entryService";
+import AbstractEntryService from "../service/abstractEntryService";
 
 interface IEntity {
   uuid: string;
@@ -25,13 +25,20 @@ const uploadMiddleware = (repository: CassandraRepository) =>
         if (splitPath[1] === "upload") {
           const id = parseInt(splitPath[2], 10);
           const uuid = splitPath[3];
-          const query = `SELECT uuid, location FROM entry_${id} WHERE uuid = ?`;
-          const resultSet = await repository.client.execute(query, [uuid], {prepare: true});
-          if (!resultSet.first()) {
+
+          const userQuery = "SELECT id, username FROM user WHERE id = ?";
+          const userResultSet = await repository.client.execute(userQuery, [id], {prepare: true});
+          if (!userResultSet.first()) {
+            return next(new NotFoundError("User with id '{" + id + "}' not found"));
+          }
+
+          const entryQuery = `SELECT uuid, location FROM entry_${id} WHERE uuid = ?`;
+          const entryResultSet = await repository.client.execute(entryQuery, [uuid], {prepare: true});
+          if (!entryResultSet.first()) {
             return next(new NotFoundError("Upload with '{" + uuid + "}' not found"));
           }
-          const entity: IEntity = convertRow(resultSet.first());
-          const locationNonReserved = entity.location.map(it => EntryService.extendLocation(it))
+          const entity: IEntity = convertRow(entryResultSet.first());
+          const locationNonReserved = entity.location.map(it => AbstractEntryService.extendLocation(it))
               .filter(it => it.status !== LocationStatus.RESERVED);
           if (locationNonReserved.length) {
             return next(new UnprocessableEntityError("In locations %s status is not RESERVED",

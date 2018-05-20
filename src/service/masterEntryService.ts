@@ -2,97 +2,38 @@
 
 import {RedisClient} from "redis";
 import {NotFoundError} from "restify-errors";
-import {v4} from "uuid";
+import v4 = require("uuid/v4");
 import {IEntryRequest} from "../controller/request/entryRequest";
 import {NodeUnavailableError, ParentPathNotExists} from "../error";
 import IEntry, {EntryType} from "../interface/entry";
 import LocationStatus from "../interface/locationStatus";
 import INode from "../interface/node";
 import IPubEntry from "../interface/pubEntry";
-import LruCache from "../lib/lruCache";
 import CassandraRepository from "../repository/cassandra";
+import AbstractEntryService from "./abstractEntryService";
 import GroupService from "./groupService";
 import PubService from "./pubService";
 import RegistryService from "./registryService";
 import UserService from "./userService";
 
-export default class EntryService {
-  public static DELIMITER = ":::";
-
-  public static extendLocation = (location: string): {uid: string, status: LocationStatus} => {
-    const splitLocation = location.split(EntryService.DELIMITER);
-    return {uid: splitLocation[0], status: splitLocation[1] as any};
-  };
-
-  private static convertRow(row: { [key: string]: any }): IEntry {
-    return {
-      child: row.child,
-      created: row.created,
-      filetype: row.filetype,
-      group: row.group,
-      lastModify: row.last_modify,
-      location: row.location,
-      locationPath: row.locationPath,
-      name: row.name,
-      owner: row.owner,
-      parent: row.parent,
-      path: row.path,
-      permission: row.permission,
-      share: row.share,
-      type: row.type,
-      uuid: row.uuid,
-    };
-  }
-
+export default class MasterEntryService extends AbstractEntryService {
   private readonly node: INode;
-  private readonly repository: CassandraRepository;
   private readonly redisClient: RedisClient;
   private readonly registryService: RegistryService;
   private readonly groupService: GroupService;
   private readonly userService: UserService;
-  private readonly uuidLruCache: LruCache<IEntry>;
-  private readonly pathLruCache: LruCache<IEntry>;
   private readonly pubEntryService: PubService<IPubEntry>;
 
   constructor(node: INode, repository: CassandraRepository, redisClient: RedisClient,
               registryService: RegistryService, groupService: GroupService, userService: UserService) {
+    super(repository);
     this.node = node;
-    this.repository = repository;
     this.redisClient = redisClient;
     this.registryService = registryService;
     this.userService = userService;
     this.groupService = groupService;
-    this.uuidLruCache = new LruCache<IEntry>(100);
-    this.pathLruCache = new LruCache<IEntry>(100);
     this.pubEntryService = new PubService<IPubEntry>(redisClient, "entry:global");
   }
-
-  public getAll = async (id: number): Promise<IEntry[]> => {
-    const query = `SELECT * FROM entry_${id};`;
-    const result = await this.repository.client.execute(query, [], {prepare: true});
-    if (result.rowLength === 0) {
-      return [];
-    }
-    return result.rows.map(row => EntryService.convertRow(row));
-  };
-
-  public getByUUID = async (id: number, uuid: string): Promise<IEntry> => {
-    const query = `SELECT * FROM entry_${id} WHERE uuid = ?;`;
-    const result = await this.repository.client.execute(query, [uuid], {prepare: true});
-    if (result.rowLength === 0) {
-      return undefined;
-    }
-    return EntryService.convertRow(result.first());
-  };
-
-  public getByPath = async (id: number, path: string): Promise<IEntry> => {
-    const query = `SELECT * FROM entry_${id} WHERE path = ?;`;
-    const result = await this.repository.client.execute(query, [path], {prepare: true});
-    if (result.rowLength === 0) {
-      return undefined;
-    }
-    return EntryService.convertRow(result.first());
-  };
 
   public save = async (id: number, entryRequest: IEntryRequest) => {
     const nodesAvailable = await this.checkNodesAvailable(entryRequest.location);
@@ -106,14 +47,14 @@ export default class EntryService {
     const locationSet = Array.from(nodesAvailable.entries())
         .map(it => {
           return it[0] === this.node.uid
-              ? it[0] + EntryService.DELIMITER + LocationStatus.CREATED
-              : it[0] + EntryService.DELIMITER + LocationStatus.RESERVED;
+              ? it[0] + AbstractEntryService.DELIMITER + LocationStatus.RESERVED
+              : it[0] + AbstractEntryService.DELIMITER + LocationStatus.CREATED;
         });
 
-    const user = this.userService.findById(entryRequest.owner);
+    const user = await this.userService.findById(entryRequest.owner);
     if (!user) throw new NotFoundError("Owner: user {%s} not found", entryRequest.owner);
 
-    const group = this.groupService.findById(entryRequest.group);
+    const group = await this.groupService.findById(entryRequest.group);
     if (!group) throw new NotFoundError("Group: group {%s} not found", entryRequest.group);
 
     const parentPathExists = await this.checkParentPath(id, entryRequest.path);
@@ -150,7 +91,7 @@ export default class EntryService {
     );
 
     this.pubEntryService.publish({
-      location_path: entry.locationPath, location_set: locationSet, owner: entry.owner, uuid: entry.uuid,
+      location: locationSet, locationPath: entry.locationPath, owner: entry.owner, uuid: entry.uuid,
     });
 
     return entry;

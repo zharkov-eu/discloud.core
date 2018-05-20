@@ -7,13 +7,16 @@ import {RedisClient} from "redis";
 import {promisify} from "util";
 import {App} from "./app";
 import config from "./config";
-import {NodeRoleEnum} from "./src/interface/node";
+import INode, {NodeRoleEnum} from "./src/interface/node";
 import INodeConfig from "./src/interface/nodeConfig";
 import NodeConfig from "./src/lib/nodeConfig";
 import {logger, LogType} from "./src/logger";
 import NodeWorker from "./src/nodeWorker";
 import CassandraRepository from "./src/repository/cassandra";
-import FileService from "./src/service/fileService";
+
+import MasterFileService from "./src/service/masterFileService";
+import SlaveEntryService from "./src/service/slaveEntryService";
+import SlaveFileService from "./src/service/slaveFileService";
 
 const statAsync = promisify(fs.stat);
 const readFileAsync = promisify(fs.readFile);
@@ -51,14 +54,22 @@ const rewriteUID = async (nodeConfig: INodeConfig, uid: string): Promise<INodeCo
   return {...nodeConfig, uid};
 };
 
+interface IMasterBehaviorOptions {
+  redisClient: RedisClient;
+  repository: CassandraRepository;
+  slaveFileService: SlaveFileService;
+}
+
 /**
  * Старт модели поведения мастера
+ * @param {INode} node
  * @param {App} app
- * @param {FileService} fileService
+ * @param options
  */
-const masterBehavior = (app: App, fileService: FileService): void => {
-  fileService.unsubscribeListener();
-  app.startMasterJob();
+const masterBehavior = (node: INode, app: App, options: IMasterBehaviorOptions): void => {
+  options.slaveFileService.unsubscribeListener();
+  const masterFileService = new MasterFileService(node, options.repository, options.redisClient);
+  app.startMasterJob(masterFileService);
 };
 
 interface IBootOptions {
@@ -84,19 +95,25 @@ export const init = (options: IBootOptions) => {
     });
     const uid = await node.register();
 
-    const fileService = new FileService(node.getNodeInfo(), repository, client);
-    await fileService.init();
+    const slaveEntryService = new SlaveEntryService(repository);
+    const slaveFileService = new SlaveFileService(node.getNodeInfo(), repository);
+    await slaveFileService.init();
 
     nodeConfig = await rewriteUID(nodeConfig, uid);
 
-    const app = new App(node, repository, client, {fileService, registryService: node.getRegistryService()});
+    const app = new App(node, repository, client, {
+      registryService: node.getRegistryService(),
+      slaveEntryService,
+      slaveFileService,
+    });
     logger.info({type: LogType.SYSTEM}, "NodeWorker started, uid: " + uid);
     await app.startServer(nodeConfig, options);
 
     if (node.getNodeInfo().role === NodeRoleEnum.MASTER) {
-      masterBehavior(app, fileService);
+      masterBehavior(node.getNodeInfo(), app, {repository, redisClient: client, slaveFileService});
     } else {
-      node.masterCb = () => masterBehavior(app, fileService);
+      node.masterCb = () => masterBehavior(node.getNodeInfo(), app,
+          {repository, redisClient: client, slaveFileService});
     }
   });
 

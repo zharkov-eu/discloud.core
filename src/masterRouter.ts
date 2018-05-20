@@ -5,13 +5,15 @@ import * as restify from "restify";
 import CassandraRepository from "./repository/cassandra";
 
 import NodeWorker from "./nodeWorker";
-import EntryService from "./service/entryService";
 import GroupService from "./service/groupService";
+import MasterEntryService from "./service/masterEntryService";
+import MasterFileService from "./service/masterFileService";
 import RegistryService from "./service/registryService";
 import UserService from "./service/userService";
 
-import EntryController from "./controller/entryController";
 import GroupController from "./controller/groupController";
+import MasterEntryController from "./controller/masterEntryController";
+import MasterFileController from "./controller/masterFileController";
 import UserController from "./controller/userController";
 import asyncWrapper from "./lib/asyncWrapper";
 
@@ -20,6 +22,7 @@ interface IRouterOptions {
   repository: CassandraRepository;
   redisClient: RedisClient;
   registryService: RegistryService;
+  masterFileService: MasterFileService;
 }
 
 export function MasterRouter(server: restify.Server, options: IRouterOptions) {
@@ -29,10 +32,11 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
 
   const groupService = new GroupService(options.repository);
   const userService = new UserService(options.repository, groupService);
-  const entryService = new EntryService(options.node.getNodeInfo(), options.repository, options.redisClient,
+  const entryService = new MasterEntryService(options.node.getNodeInfo(), options.repository, options.redisClient,
       options.registryService, groupService, userService);
 
-  const entryController = new EntryController(entryService, userService);
+  const entryController = new MasterEntryController(entryService, userService);
+  const fileController = new MasterFileController(options.masterFileService);
   const groupController = new GroupController(groupService);
   const userController = new UserController(userService);
 
@@ -42,12 +46,9 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
 
   addRoute("post", "/entry/:userid/", entryController.post);
 
-  addRoute("get", "/entry/:userid/entry", entryController.getEntries);
-  addRoute("get", "/entry/:userid/entry/:entryuid", entryController.getEntry);
   addRoute("patch", "/entry/:userid/entry/:entryuid", entryController.patchEntry);
   addRoute("del", "/entry/:userid/entry/:entryuid", entryController.delEntry);
 
-  addRoute("get", "/entry/:userid/path/:path", entryController.getPath);
   addRoute("patch", "/entry/:userid/path/:path", entryController.patchPath);
   addRoute("del", "/entry/:userid/path/:path", entryController.delPath);
 
@@ -62,5 +63,5 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
   addRoute("patch", "/user/:id", userController.patch);
   addRoute("del", "/user/:id", userController.del);
 
-  addRoute("post", "/upload/*", async (req, res) => res.send());
+  addRoute("post", "/upload/:userid/:entryuid", fileController.post);
 }

@@ -148,9 +148,12 @@ export default class UserService {
           location set<text>,
           location_path text
     );`;
-    const createPathIndex = `CREATE INDEX IF NOT EXISTS entry_${id}_by_path ON discloud.entry_${id} (path);`;
-    const createParentIndex = `CREATE INDEX IF NOT EXISTS entry_${id}_by_path ON discloud.entry_${id} (parent);`;
+    const indexQueries = [];
+    indexQueries.push(`CREATE INDEX IF NOT EXISTS entry_${id}_by_path ON discloud.entry_${id} (path);`);
+    indexQueries.push(`CREATE INDEX IF NOT EXISTS entry_${id}_by_path ON discloud.entry_${id} (parent);`);
     await this.repository.client.execute(createTable);
-    await this.repository.client.batch([createPathIndex, createParentIndex]);
+    for (const query of indexQueries) {
+      await this.repository.client.execute(query);
+    }
   };
 }
