@@ -14,9 +14,11 @@ import {logger, LogType} from "./src/logger";
 import NodeWorker from "./src/nodeWorker";
 import CassandraRepository from "./src/repository/cassandra";
 
+import GroupService from "./src/service/groupService";
 import MasterFileService from "./src/service/masterFileService";
 import SlaveEntryService from "./src/service/slaveEntryService";
 import SlaveFileService from "./src/service/slaveFileService";
+import UserService from "./src/service/userService";
 
 const statAsync = promisify(fs.stat);
 const readFileAsync = promisify(fs.readFile);
@@ -95,6 +97,9 @@ export const init = (options: IBootOptions) => {
     });
     const uid = await node.register();
 
+    const groupService = new GroupService(repository);
+    const userService = new UserService(repository, groupService);
+
     const slaveEntryService = new SlaveEntryService(repository);
     const slaveFileService = new SlaveFileService(node.getNodeInfo(), repository);
     await slaveFileService.init();
@@ -102,9 +107,11 @@ export const init = (options: IBootOptions) => {
     nodeConfig = await rewriteUID(nodeConfig, uid);
 
     const app = new App(node, repository, client, {
+      groupService,
       registryService: node.getRegistryService(),
       slaveEntryService,
       slaveFileService,
+      userService,
     });
     logger.info({type: LogType.SYSTEM}, "NodeWorker started, uid: " + uid);
     await app.startServer(nodeConfig, options);

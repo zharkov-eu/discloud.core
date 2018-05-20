@@ -1,7 +1,8 @@
 "use strict";
 
 export default interface IPubFile {
-  uuid: string;
+  location: string[];
   size: number; // In kilobytes
-  location_set: string[];
+  userId: number;
+  uuid: string;
 }

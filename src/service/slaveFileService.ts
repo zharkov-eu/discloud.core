@@ -1,10 +1,12 @@
 "use strict";
 
+import * as fse from "fs-extra";
+import * as path from "path";
+import {NotFoundError} from "restify-errors";
 import LocationStatus from "../interface/locationStatus";
 import INode from "../interface/node";
 import IPubEntry from "../interface/pubEntry";
 import IPubFile from "../interface/pubFile";
-import {logger} from "../logger";
 import CassandraRepository from "../repository/cassandra";
 import AbstractEntryService from "./abstractEntryService";
 import AbstractFileService from "./abstractFileService";
@@ -29,11 +31,20 @@ export default class SlaveFileService extends AbstractFileService {
   };
 
   public fileListener = async (file: IPubFile): Promise<void> => {
-    const service = file.location_set
+    const service = file.location
         .map(location => AbstractEntryService.extendLocation(location))
         .filter(node => this.node.uid === node.uid)[0];
     if (service !== undefined) {
-      logger.info(file);
+      const resultSet = await this.repository.client.execute(
+          `SELECT * FROM entry_${file.userId} WHERE uuid = ?`, [file.uuid], {prepare: true});
+      if (!resultSet.first()) {
+        throw new NotFoundError("Entry by uuid + '{" + file.uuid + "}' not found");
+      }
+      const entry = AbstractEntryService.convertRow(resultSet.first());
+      const locationPath = entry.locationPath.split("/");
+      const locationDirectory = entry.locationPath.split("/").slice(0, locationPath.length - 1);
+
+      await fse.ensureDir(path.join(this.rootPath, ...locationDirectory));
     }
   };
 

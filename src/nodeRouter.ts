@@ -11,12 +11,14 @@ import NodeEntryController from "./controller/nodeEntryController";
 import NodeFileController from "./controller/nodeFileController";
 import asyncWrapper from "./lib/asyncWrapper";
 import NodeWorker from "./nodeWorker";
+import UserService from "./service/userService";
 
 interface IRouterOptions {
   node: NodeWorker;
   registryService: RegistryService;
   slaveFileService: SlaveFileService;
   slaveEntryService: SlaveEntryService;
+  userService: UserService;
 }
 
 export function NodeRouter(server: restify.Server, options: IRouterOptions) {
@@ -29,15 +31,16 @@ export function NodeRouter(server: restify.Server, options: IRouterOptions) {
   };
 
   const nodeController = new NodeController(options.node, options.registryService);
-  const fileController = new NodeFileController(options.slaveFileService);
-  const entryController = new NodeEntryController(options.slaveEntryService);
+  const fileController = new NodeFileController(options.slaveEntryService);
+  const entryController = new NodeEntryController(options.slaveEntryService, options.userService);
 
   addRoute("get", "/node/global", nodeController.getAllGlobal);
   addRoute("get", "/node/local", nodeController.getAll);
   addRoute("get", "/node/current", nodeController.get);
 
-  addRoute("get", "/file/:userid/*", fileController.get);
+  addRoute("get", "/file/:userid(\\d+)/uuid/:uuid", fileController.getByUuid);
+  addRoute("get", "/file/:userid(\\d+)/path/:path(.*)", fileController.getByPath);
 
-  addRoute("get", "/entry/:userid/entry", entryController.getEntries);
-  addRoute("get", "/entry/:userid/entry/:entryuid", entryController.getEntry);
+  addRoute("get", "/entry/:userid(\\d+)/entry", entryController.getEntries);
+  addRoute("get", "/entry/:userid(\\d+)/entry/:uuid", entryController.getEntry);
 }

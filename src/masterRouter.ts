@@ -18,11 +18,13 @@ import UserController from "./controller/userController";
 import asyncWrapper from "./lib/asyncWrapper";
 
 interface IRouterOptions {
+  groupService: GroupService;
   node: NodeWorker;
   repository: CassandraRepository;
   redisClient: RedisClient;
   registryService: RegistryService;
   masterFileService: MasterFileService;
+  userService: UserService;
 }
 
 export function MasterRouter(server: restify.Server, options: IRouterOptions) {
@@ -30,15 +32,13 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
     throw new Error("MasterRouter options is not a object");
   }
 
-  const groupService = new GroupService(options.repository);
-  const userService = new UserService(options.repository, groupService);
   const entryService = new MasterEntryService(options.node.getNodeInfo(), options.repository, options.redisClient,
-      options.registryService, groupService, userService);
+      options.registryService, options.groupService, options.userService);
 
-  const entryController = new MasterEntryController(entryService, userService);
+  const entryController = new MasterEntryController(entryService, options.userService);
   const fileController = new MasterFileController(options.masterFileService);
-  const groupController = new GroupController(groupService);
-  const userController = new UserController(userService);
+  const groupController = new GroupController(options.groupService);
+  const userController = new UserController(options.userService);
 
   const addRoute = (method: string, path: string, fun: (req, res, next) => any) => {
     server[method](path, asyncWrapper(fun));

@@ -18,11 +18,11 @@ import PubService from "./pubService";
 const renameAsync = promisify(fs.rename);
 
 export default class MasterFileService extends AbstractFileService {
-  private readonly pubEntryService: PubService<IPubFile>;
+  private readonly pubFileService: PubService<IPubFile>;
 
   constructor(node: INode, repository: CassandraRepository, redisClient: RedisClient) {
     super(node, repository);
-    this.pubEntryService = new PubService<IPubFile>(redisClient, "file:global");
+    this.pubFileService = new PubService<IPubFile>(redisClient, "file:global");
   }
 
   public saveFile = async (req: restify.Request, options: { userId: number, entryUuid: string }) => {
@@ -45,5 +45,13 @@ export default class MasterFileService extends AbstractFileService {
     await Promise.all(renameFilePromises);
 
     await this.updateLocationStatus(entry, LocationStatus.RESERVED, LocationStatus.CREATED);
+    const location = entry.location
+        .map(it => {
+          const node = AbstractEntryService.extendLocation(it);
+          if (node.uid === this.node.uid) node.status = LocationStatus.CREATED;
+          return AbstractEntryService.stringifyLocation(node);
+        });
+
+    this.pubFileService.publish({location, size: entry.size, userId: options.userId, uuid: entry.uuid});
   };
 }
