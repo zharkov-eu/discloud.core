@@ -1,6 +1,7 @@
 "use strict";
 
 import * as fs from "fs";
+import * as fse from "fs-extra";
 import * as path from "path";
 import {RedisClient} from "redis";
 import {promisify} from "util";
@@ -8,7 +9,6 @@ import {App} from "./app";
 import config from "./config";
 import {NodeRoleEnum} from "./src/interface/node";
 import INodeConfig from "./src/interface/nodeConfig";
-import {mkDirRecursive} from "./src/lib/mkdir";
 import NodeConfig from "./src/lib/nodeConfig";
 import {logger, LogType} from "./src/logger";
 import NodeWorker from "./src/nodeWorker";
@@ -46,18 +46,7 @@ const loadConfig = () => new Promise<INodeConfig | undefined>(resolve => {
  * @return {Promise<INodeConfig>}
  */
 const rewriteUID = async (nodeConfig: INodeConfig, uid: string): Promise<INodeConfig> => {
-  try {
-    const stats = await statAsync(CONFIG_DIRECTORY);
-    if (!stats.isDirectory()) {
-      throw new Error();
-    }
-  } catch (e) {
-    if (e.code === "ENOENT") {
-      await mkDirRecursive(CONFIG_DIRECTORY);
-    } else {
-      throw e;
-    }
-  }
+  await fse.ensureDir(CONFIG_DIRECTORY);
   await writeFileAsync(CONFIG_PATH, JSON.stringify({...nodeConfig, uid}));
   return {...nodeConfig, uid};
 };

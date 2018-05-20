@@ -1,6 +1,7 @@
 "use strict";
 
 import * as fs from "fs";
+import * as fse from "fs-extra";
 import * as path from "path";
 import {RedisClient} from "redis";
 import * as restify from "restify";
@@ -9,7 +10,6 @@ import config from "../../config";
 import INode from "../interface/node";
 import IPubEntry from "../interface/pubEntry";
 import IPubFile from "../interface/pubFile";
-import {mkDirRecursive} from "../lib/mkdir";
 import {logger} from "../logger";
 import CassandraRepository from "../repository/cassandra";
 import EntryService from "./entryService";
@@ -47,8 +47,8 @@ class FileService {
   public getTempPath = () => [this.rootPath, "tmp"].join(path.sep);
 
   public init = async () => {
-    await this.createDirectory(this.getRootPath());
-    await this.createDirectory(this.getTempPath());
+    await fse.ensureDir(this.getRootPath());
+    await fse.ensureDir(this.getTempPath());
   };
 
   public entryListener = async (entry: IPubEntry): Promise<void> => {
@@ -83,16 +83,6 @@ class FileService {
     });
     await Promise.all(renameFilePromises);
   };
-
-  private createDirectory = (dirPath: string) => new Promise((resolve, reject) => {
-    statAsync(dirPath)
-        .then(
-            (result) => result.isDirectory() ? Promise.resolve() : Promise.reject("RootPath not a directory"),
-            () => mkDirRecursive(this.rootPath),
-        )
-        .then(() => resolve())
-        .catch((err) => reject(err));
-  })
 }
 
 export default FileService;

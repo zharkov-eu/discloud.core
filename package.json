@@ -20,6 +20,7 @@
     "bunyan": "^1.8.12",
     "cassandra-driver": "^3.5.0",
     "cli-args-parser": "^1.0.0",
+    "fs-extra": "^6.0.1",
     "ip": "^1.1.5",
     "redis": "^2.8.0",
     "request": "^2.85.0",
@@ -27,10 +28,11 @@
     "restify": "^7.1.1",
     "restify-errors": "^6.0.0",
     "uuid": "^3.2.1",
-    "validation-api": "^0.1.14"
+    "validation-api": "^0.1.18"
   },
   "devDependencies": {
     "@types/cassandra-driver": "^3.4.0",
+    "@types/fs-extra": "^5.0.2",
     "@types/ip": "0.0.30",
     "@types/mocha": "^5.2.0",
     "@types/redis": "^2.8.6",

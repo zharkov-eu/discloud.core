@@ -9,15 +9,15 @@ const client = new cassandra.Client({contactPoints: ["127.0.0.1"]});
 const schemaScript = fs.readFileSync(path.join(__dirname, "schema.cql"), "utf8");
 
 (async () => {
-  const queryPromises = [];
-  await client.execute(schemaScript.split(";")[0]);
-  schemaScript.split(";").forEach((query) => {
-    if (query === "\n") {
-      return;
-    }
-    queryPromises.push(client.execute(query));
-  });
-  await Promise.all(queryPromises);
+  const commands = schemaScript.replace(/([\n\r])/g, "")
+      .split(";")
+      .filter(it => it.replace(/ /g, "").length !== 0)
+      .map(it => it + ";");
+
+  await client.execute(commands.shift()); // Create keyspace commands
+  for (const command of commands) {
+    await client.execute(command);
+  }
 })().then(() => {
   logger.info("Schema creation ended successful");
   process.exit(0);
