@@ -29,7 +29,7 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
 
   const groupService = new GroupService(options.repository);
   const userService = new UserService(options.repository, groupService);
-  const entryService = new EntryService(options.repository, options.redisClient,
+  const entryService = new EntryService(options.node.getNodeInfo(), options.repository, options.redisClient,
       options.registryService, groupService, userService);
 
   const entryController = new EntryController(entryService, userService);
@@ -47,7 +47,6 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
   addRoute("patch", "/entry/:userid/entry/:entryuid", entryController.patchEntry);
   addRoute("del", "/entry/:userid/entry/:entryuid", entryController.delEntry);
 
-  addRoute("get", "/entry/:userid/path", entryController.getPaths);
   addRoute("get", "/entry/:userid/path/:path", entryController.getPath);
   addRoute("patch", "/entry/:userid/path/:path", entryController.patchPath);
   addRoute("del", "/entry/:userid/path/:path", entryController.delPath);
@@ -62,4 +61,6 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
   addRoute("get", "/user/:id", userController.get);
   addRoute("patch", "/user/:id", userController.patch);
   addRoute("del", "/user/:id", userController.del);
+
+  addRoute("post", "/upload/*", async (req, res) => res.send());
 }

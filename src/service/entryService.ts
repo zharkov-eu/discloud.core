@@ -4,8 +4,10 @@ import {RedisClient} from "redis";
 import {NotFoundError} from "restify-errors";
 import {v4} from "uuid";
 import {IEntryRequest} from "../controller/request/entryRequest";
-import {NodeUnavailableError} from "../error";
-import IEntry from "../interface/entry";
+import {NodeUnavailableError, ParentPathNotExists} from "../error";
+import IEntry, {EntryType} from "../interface/entry";
+import LocationStatus from "../interface/locationStatus";
+import INode from "../interface/node";
 import IPubEntry from "../interface/pubEntry";
 import LruCache from "../lib/lruCache";
 import CassandraRepository from "../repository/cassandra";
@@ -15,7 +17,12 @@ import RegistryService from "./registryService";
 import UserService from "./userService";
 
 export default class EntryService {
-  private static DELIMITER = ":::";
+  public static DELIMITER = ":::";
+
+  public static extendLocation = (location: string): {uid: string, status: LocationStatus} => {
+    const splitLocation = location.split(EntryService.DELIMITER);
+    return {uid: splitLocation[0], status: splitLocation[1] as any};
+  };
 
   private static convertRow(row: { [key: string]: any }): IEntry {
     return {
@@ -37,6 +44,7 @@ export default class EntryService {
     };
   }
 
+  private readonly node: INode;
   private readonly repository: CassandraRepository;
   private readonly redisClient: RedisClient;
   private readonly registryService: RegistryService;
@@ -46,8 +54,9 @@ export default class EntryService {
   private readonly pathLruCache: LruCache<IEntry>;
   private readonly pubEntryService: PubService<IPubEntry>;
 
-  constructor(repository: CassandraRepository, redisClient: RedisClient,
+  constructor(node: INode, repository: CassandraRepository, redisClient: RedisClient,
               registryService: RegistryService, groupService: GroupService, userService: UserService) {
+    this.node = node;
     this.repository = repository;
     this.redisClient = redisClient;
     this.registryService = registryService;
@@ -62,7 +71,7 @@ export default class EntryService {
     const query = `SELECT * FROM entry_${id};`;
     const result = await this.repository.client.execute(query, [], {prepare: true});
     if (result.rowLength === 0) {
-      return undefined;
+      return [];
     }
     return result.rows.map(row => EntryService.convertRow(row));
   };
@@ -93,7 +102,13 @@ export default class EntryService {
     if (nodesUnavailable.length !== 0) {
       throw new NodeUnavailableError("Nodes " + nodesUnavailable.map(node => node.uid).join(",") + " is unavailable");
     }
-    const locationSet = Array.from(nodesAvailable.entries()).map(it => it[0] + EntryService.DELIMITER + "0");
+
+    const locationSet = Array.from(nodesAvailable.entries())
+        .map(it => {
+          return it[0] === this.node.uid
+              ? it[0] + EntryService.DELIMITER + LocationStatus.CREATED
+              : it[0] + EntryService.DELIMITER + LocationStatus.RESERVED;
+        });
 
     const user = this.userService.findById(entryRequest.owner);
     if (!user) throw new NotFoundError("Owner: user {%s} not found", entryRequest.owner);
@@ -101,12 +116,16 @@ export default class EntryService {
     const group = this.groupService.findById(entryRequest.group);
     if (!group) throw new NotFoundError("Group: group {%s} not found", entryRequest.group);
 
+    const parentPathExists = await this.checkParentPath(id, entryRequest.path);
+    if (!parentPathExists) throw new ParentPathNotExists("Entry: parent path not exist");
+
     const locationPath = [id, entryRequest.path, entryRequest.name].join("/").replace(/\/+/g, "/");
 
     const timestamp = new Date().getTime();
     const entry: IEntry = {
-      child: [],
+      child: entryRequest.type === EntryType.DIRECTORY ? [] : null,
       created: timestamp,
+      filetype: entryRequest.type === EntryType.FILE ? entryRequest.filetype : null,
       group: entryRequest.group,
       lastModify: timestamp,
       location: locationSet,
@@ -121,11 +140,11 @@ export default class EntryService {
       uuid: v4(),
     };
     const query = `INSERT INTO entry_${id} (
-        uuid, name, type, filetype, parent, child, path, owner, group, permission, share, created, last_modify,
-        location, location_path) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`;
+        uuid, name, type, filetype, parent, child, path, owner, group, permission, share, created, last_modify, size,
+        location, location_path) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`;
     await this.repository.client.execute(query,
         [entry.uuid, entry.name, entry.type, entry.filetype, entry.parent, entry.child, entry.path,
-          entry.owner, entry.group, entry.permission, entry.share, entry.created, entry.lastModify,
+          entry.owner, entry.group, entry.permission, entry.share, entry.created, entry.lastModify, entry.size,
           entry.location, entry.locationPath],
         {prepare: true},
     );
@@ -137,13 +156,14 @@ export default class EntryService {
     return entry;
   };
 
-  public deleteByPath = async (id: number, path: string): Promise<IEntry> => {
-    const query = ` * FROM entry_${id} WHERE path = ?;`;
-    const result = await this.repository.client.execute(query, [path], {prepare: true});
-    if (result.rowLength === 0) {
-      return undefined;
-    }
-    return EntryService.convertRow(result.first());
+  public deleteByUuid = async (id: number, uuid: string): Promise<void> => {
+    const query = `DELETE FROM entry_${id} WHERE uuid = ?;`;
+    await this.repository.client.execute(query, [uuid], {prepare: true});
+  };
+
+  public deleteByPath = async (id: number, path: string): Promise<void> => {
+    const query = `DELETE FROM entry_${id} WHERE path = ?;`;
+    await this.repository.client.execute(query, [path], {prepare: true});
   };
 
   private checkNodesAvailable = async (uids: string[]): Promise<Map<string, boolean>> => {
@@ -153,5 +173,13 @@ export default class EntryService {
     const nodes = await this.registryService.getAllNodes();
     nodes.forEach(node => nodeMap.has(node.uid) ? nodeMap.set(node.uid, true) : undefined);
     return nodeMap;
-  }
+  };
+
+  private checkParentPath = async (id: number, path: string): Promise<boolean> => {
+    const splitPath = path.split("/");
+    if (splitPath.length <= 2) return true;
+    const query = `SELECT * FROM entry_${id} WHERE path = ?;`;
+    const resultSet = await this.repository.client.execute(query, [splitPath.slice(-2, -1)], {prepare: true});
+    return resultSet.first() !== undefined;
+  };
 }

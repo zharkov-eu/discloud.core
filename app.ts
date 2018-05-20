@@ -5,6 +5,7 @@ import * as restify from "restify";
 import INodeConfig from "./src/interface/nodeConfig";
 import {logger, LogType} from "./src/logger";
 import {MasterRouter} from "./src/masterRouter";
+import uploadMiddleware from "./src/middleware/uploadMiddleware";
 import {NodeRouter} from "./src/nodeRouter";
 import NodeWorker from "./src/nodeWorker";
 import CassandraRepository from "./src/repository/cassandra";
@@ -47,6 +48,7 @@ export class App {
 
     this.server.use(restify.plugins.acceptParser(this.server.acceptable));
     this.server.use(restify.plugins.queryParser());
+    this.server.use(uploadMiddleware(this.repository));
     this.server.use(restify.plugins.bodyParser({
       hash: "md5",
       keepExtensions: true,

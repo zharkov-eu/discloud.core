@@ -6,7 +6,6 @@ import {promisify} from "util";
 import {IUserRequest} from "../controller/request/userRequest";
 import IUser from "../interface/user";
 import CassandraRepository from "../repository/cassandra";
-import EntryService from "./entryService";
 import GroupService from "./groupService";
 
 const randomBytesAsync = promisify(crypto.randomBytes);
@@ -144,12 +143,14 @@ export default class UserService {
           permission text,
           created timestamp,
           last_modify timestamp,
+          size int,
           share text,
           location set<text>,
           location_path text
     );`;
-    const createIndex = `CREATE INDEX IF NOT EXISTS entry_${id}_by_path ON discloud.entry_${id} (path);`;
+    const createPathIndex = `CREATE INDEX IF NOT EXISTS entry_${id}_by_path ON discloud.entry_${id} (path);`;
+    const createParentIndex = `CREATE INDEX IF NOT EXISTS entry_${id}_by_path ON discloud.entry_${id} (parent);`;
     await this.repository.client.execute(createTable);
-    await this.repository.client.execute(createIndex);
+    await this.repository.client.batch([createPathIndex, createParentIndex]);
   };
 }

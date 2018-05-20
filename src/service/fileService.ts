@@ -2,12 +2,18 @@
 
 import * as fs from "fs";
 import * as path from "path";
+import {RedisClient} from "redis";
 import * as restify from "restify";
 import {promisify} from "util";
 import config from "../../config";
+import INode from "../interface/node";
 import IPubEntry from "../interface/pubEntry";
+import IPubFile from "../interface/pubFile";
 import {mkDirRecursive} from "../lib/mkdir";
 import {logger} from "../logger";
+import CassandraRepository from "../repository/cassandra";
+import EntryService from "./entryService";
+import PubService from "./pubService";
 import SubService from "./subService";
 
 const statAsync = promisify(fs.stat);
@@ -16,13 +22,23 @@ const renameAsync = promisify(fs.rename);
 const DEFAULT_PATH = path.join("data");
 
 class FileService {
+  private readonly node: INode;
   private readonly rootPath: string;
+  private readonly repository: CassandraRepository;
+  private readonly pubEntryService: PubService<IPubFile>;
   private readonly subEntryService: SubService<IPubEntry>;
+  private readonly subFileService: SubService<IPubFile>;
 
-  constructor() {
+  constructor(node: INode, repository: CassandraRepository, redisClient: RedisClient) {
+    this.node = node;
+    this.repository = repository;
     this.rootPath = config.data && config.data.path ? config.data.path : DEFAULT_PATH;
+    this.pubEntryService = new PubService<IPubFile>(redisClient, "file:global");
     this.subEntryService = new SubService<IPubEntry>("entry:global", (message: IPubEntry) => {
-      logger.info(message);
+      this.entryListener(message);
+    });
+    this.subFileService = new SubService<IPubFile>("file:global", (message: IPubFile) => {
+      this.fileListener(message);
     });
   }
 
@@ -35,8 +51,28 @@ class FileService {
     await this.createDirectory(this.getTempPath());
   };
 
+  public entryListener = async (entry: IPubEntry): Promise<void> => {
+    const service = entry.location_set
+        .map(location => EntryService.extendLocation(location))
+        .filter(node => this.node.uid === node.uid)[0];
+    if (service !== undefined) {
+      const query = `UPDATE entry_${entry.owner} SET location_set = ? WHERE uuid = ?;`;
+      logger.info(entry);
+    }
+  };
+
+  public fileListener = async (file: IPubFile): Promise<void> => {
+    const service = file.location_set
+        .map(location => EntryService.extendLocation(location))
+        .filter(node => this.node.uid === node.uid)[0];
+    if (service !== undefined) {
+      logger.info(file);
+    }
+  };
+
   public unsubscribeListener = () => {
     this.subEntryService.unsubscribe();
+    this.subFileService.unsubscribe();
   };
 
   public saveFile = async (req: restify.Request, options: { user: string }) => {

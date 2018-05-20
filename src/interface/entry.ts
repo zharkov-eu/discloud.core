@@ -22,6 +22,7 @@ export default interface IEntry {
   permission: string; // Entry permission (UNIX-like, ex: 644)
   share?: EntryShare; // Entry share status, set only if entry have one of shared type
   created: number; // Entry created timestamp
+  size?: number; // Entry size in kilobytes
   lastModify: number; // Entry last modify timestamp
   location: string[]; // Nodes of physical content location
   locationPath: string; // Physical location on nodes

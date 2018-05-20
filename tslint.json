@@ -2,6 +2,7 @@
   "extends": "tslint:recommended",
   "rules": {
     "arrow-parens": ["ban-single-arg-parens"],
+    "max-classes-per-file": false,
     "no-string-literal": false,
     "no-console": false,
     "curly": false,

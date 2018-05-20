@@ -56,9 +56,7 @@ export default class UserController {
 
   public del = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
     const user = await this.userService.findById(req.params.id);
-    if (!user) {
-      return next(new NotFoundError("User by id {'%s'} not found", req.params.id));
-    }
+    if (!user) return next(new NotFoundError("User by id {'%s'} not found", req.params.id));
 
     await this.userService.delete(req.params.id);
     return res.send(204);

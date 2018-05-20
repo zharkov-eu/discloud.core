@@ -95,7 +95,7 @@ export const init = (options: IBootOptions) => {
     });
     const uid = await node.register();
 
-    const fileService = new FileService();
+    const fileService = new FileService(node.getNodeInfo(), repository, client);
     await fileService.init();
 
     nodeConfig = await rewriteUID(nodeConfig, uid);
