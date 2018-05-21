@@ -85,7 +85,7 @@ export class App {
     MasterRouter(this.server, {
       groupService: this.groupService,
       masterFileService,
-      node: this.node,
+      node: this.node.getNodeInfo(),
       redisClient: this.redisClient,
       registryService: this.registryService,
       repository: this.repository,

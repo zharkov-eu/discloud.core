@@ -1,5 +1,18 @@
 {
-  "ipv4": "127.0.0.1",
+  "data": {
+    "path": "data"
+  },
+  "backend": {
+    "auth": {
+      "location": "https://auth.discloud.ru/api/auth",
+      "password": "",
+      "username": ""
+    }
+  },
+  "cassandra": {
+    "contactPoints": "127.0.0.1",
+    "keyspace": "discloud"
+  },
   "redis": {
     "host": "127.0.0.1",
     "port": 6379

@@ -7,6 +7,9 @@ import CassandraRepository from "./repository/cassandra";
 import RegistryService from "./service/registryService";
 
 interface INodeOptions {
+  location?: string;
+  port?: number;
+  protocol?: string;
   uid?: string;
   ipv4?: string;
   zone: string;
@@ -17,6 +20,9 @@ class NodeWorker {
 
   private uid: string;
   private ipv4: string;
+  private location: string;
+  private port: number;
+  private protocol: string;
   private role: NodeRoleEnum;
   private updateAliveFieldInt: NodeJS.Timer;
   private checkMasterAliveInt?: NodeJS.Timer;
@@ -30,11 +36,17 @@ class NodeWorker {
     this.uid = options.uid;
     this.ipv4 = options.ipv4;
     this.zone = options.zone;
+    this.port = options.port || 80;
+    this.protocol = options.protocol || "http";
+    this.location = options.location || "localhost";
     this.registryService = new RegistryService(client, repository, {zone: options.zone});
   }
 
   public getNodeInfo = (): INode => ({
     ipv4: this.ipv4,
+    location: this.location,
+    port: this.port,
+    protocol: this.protocol,
     role: this.role === NodeRoleEnum.MASTER ? NodeRoleEnum.MASTER : NodeRoleEnum.SLAVE,
     uid: this.uid,
     zone: this.zone,
@@ -48,7 +60,12 @@ class NodeWorker {
    */
   public register = async (): Promise<string> => {
     this.ipv4 = this.ipv4 || this.registryService.getIPv4();
-    this.uid = await this.registryService.registerNode(this.ipv4, this.uid);
+    this.uid = await this.registryService.registerNode({
+      ipv4: this.ipv4,
+      location: this.location,
+      port: this.port,
+      protocol: this.protocol,
+    }, this.uid);
     this.updateAliveFieldInt = setInterval(() => this.registryService.updateAliveField(this.uid), 500);
     this.startRoleBehavior();
     return this.uid;

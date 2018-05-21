@@ -2,6 +2,9 @@ CREATE KEYSPACE IF NOT EXISTS discloud WITH replication = {'class': 'SimpleStrat
 CREATE TABLE IF NOT EXISTS discloud.node (
     uid uuid,
     ipv4 inet,
+    location text,
+    port int,
+    protocol text,
     role text,
     zone text,
     PRIMARY KEY (uid, zone)

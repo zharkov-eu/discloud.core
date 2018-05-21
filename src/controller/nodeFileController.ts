@@ -13,7 +13,11 @@ export default class NodeFileController {
 
   public getByUuid = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
     const entry = await this.entryService.getByUUID(req.params.userid, req.params.uuid);
-    return res.redirect(303, path.resolve("data", req.params.userid, entry.path, entry.name), next);
+    const splitPath = entry.path.split("/").filter(it => it !== "");
+    const redirectUrl = ["http://127.0.0.1:8080/", "data", req.params.userid];
+    if (splitPath.length) redirectUrl.push(...splitPath);
+    redirectUrl.push(entry.name);
+    return res.redirect(303, redirectUrl.join("/"), next);
   };
 
   public getByPath = async (req: restify.Request, res: restify.Response, next: restify.Next) => {

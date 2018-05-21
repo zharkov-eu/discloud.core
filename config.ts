@@ -4,7 +4,10 @@ import * as path from "path";
 
 interface IConfig {
   data: {path: string};
-  ipv4: string;
+  backend: {
+    auth: {location: string, password: string, username: string},
+  };
+  cassandra: {contactPoints: string[], keyspace: string};
   redis: {host: string, port: number};
 }
 

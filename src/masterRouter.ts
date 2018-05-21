@@ -4,7 +4,6 @@ import {RedisClient} from "redis";
 import * as restify from "restify";
 import CassandraRepository from "./repository/cassandra";
 
-import NodeWorker from "./nodeWorker";
 import GroupService from "./service/groupService";
 import MasterEntryService from "./service/masterEntryService";
 import MasterFileService from "./service/masterFileService";
@@ -15,11 +14,12 @@ import GroupController from "./controller/groupController";
 import MasterEntryController from "./controller/masterEntryController";
 import MasterFileController from "./controller/masterFileController";
 import UserController from "./controller/userController";
+import INode from "./interface/node";
 import asyncWrapper from "./lib/asyncWrapper";
 
 interface IRouterOptions {
   groupService: GroupService;
-  node: NodeWorker;
+  node: INode;
   repository: CassandraRepository;
   redisClient: RedisClient;
   registryService: RegistryService;
@@ -32,11 +32,11 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
     throw new Error("MasterRouter options is not a object");
   }
 
-  const entryService = new MasterEntryService(options.node.getNodeInfo(), options.repository, options.redisClient,
+  const entryService = new MasterEntryService(options.node, options.repository, options.redisClient,
       options.registryService, options.groupService, options.userService);
 
   const entryController = new MasterEntryController(entryService, options.userService);
-  const fileController = new MasterFileController(options.masterFileService);
+  const fileController = new MasterFileController(options.node, options.masterFileService);
   const groupController = new GroupController(options.groupService);
   const userController = new UserController(options.userService);
 

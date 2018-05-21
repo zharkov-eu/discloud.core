@@ -1,11 +1,13 @@
 "use strict";
 
 import {isV4Format} from "ip";
-import {IsPositiveNumber, NotEmptyString, Validate, ValidationError} from "validation-api";
+import {IsMemberOf, IsPositiveNumber, NotEmptyString, Validate, ValidationError} from "validation-api";
 import INodeConfig from "../interface/nodeConfig";
 
 const keysAllowed: Map<string, boolean> = new Map([
   ["bindIp", true],
+  ["location", true],
+  ["protocol", true],
   ["port", true],
   ["uid", true],
   ["zone", true],
@@ -18,6 +20,12 @@ export default class NodeConfig implements INodeConfig {
 
   @IsPositiveNumber()
   public port: number;
+
+  @IsMemberOf({array: ["http", "https"]})
+  public protocol: string;
+
+  @NotEmptyString()
+  public location: string;
 
   @NotEmptyString()
   public bindIp: string;
@@ -51,12 +59,7 @@ export default class NodeConfig implements INodeConfig {
       }]);
     }
 
-    if (config.uid) {
-      this.uid = config.uid;
-    }
-    if (config.port) {
-      this.port = config.port;
-    }
+    if (config.uid) this.uid = config.uid;
     if (config.bindIp) {
       if (!isV4Format(config.bindIp)) {
         throw new ValidationError([{
@@ -68,8 +71,9 @@ export default class NodeConfig implements INodeConfig {
       }
       this.bindIp = config.bindIp;
     }
-    if (config.zone) {
-      this.zone = config.zone;
-    }
+    if (config.port) this.port = config.port;
+    if (config.protocol) this.protocol = config.protocol;
+    if (config.location) this.location = config.location;
+    if (config.zone) this.zone = config.zone;
   }
 }

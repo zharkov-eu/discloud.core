@@ -4,7 +4,7 @@ import {RedisClient} from "redis";
 import {promisify} from "util";
 import {v4} from "uuid";
 import config from "../../config";
-import INode, {NodeRoleEnum} from "../interface/node";
+import INode, {INodeRedis, NodeRoleEnum} from "../interface/node";
 import {getNetworkInterfaces} from "../lib/ip";
 import CassandraRepository from "../repository/cassandra";
 
@@ -34,6 +34,9 @@ class RegistryService {
   private static convertRow(row: { [key: string]: any }): INode {
     return {
       ipv4: row.ipv4,
+      location: row.location,
+      port: row.port,
+      protocol: row.protocol,
       role: row.role,
       uid: row.uid,
       zone: row.zone,
@@ -66,14 +69,14 @@ class RegistryService {
 
   /**
    * Регистрация ноды
-   * @param {string} ipv4
+   * @param {INodeRedis} node
    * @param {string} uid - Использовать переданный uid для регистрации
    * @return {Promise<string>}
    */
-  public registerNode = async (ipv4: string, uid?: string): Promise<string> => {
+  public registerNode = async (node: INodeRedis, uid?: string): Promise<string> => {
     uid = uid || v4();
-    const code = await hsetnxAsync("node", uid, ipv4);
-    return (code !== 1) ? this.registerNode(ipv4) : Promise.resolve(uid);
+    const code = await hsetnxAsync("node", uid, JSON.stringify(node));
+    return (code !== 1) ? this.registerNode(node) : Promise.resolve(uid);
   };
 
   /**
@@ -151,8 +154,12 @@ class RegistryService {
     const master = await getAsync("masterNode");
     const nodes: INode[] = [];
     Object.keys(nodeMap).forEach(uid => {
+      const node: INodeRedis = JSON.parse(nodeMap[uid]);
       nodes.push({
-        ipv4: nodeMap[uid],
+        ipv4: node.ipv4,
+        location: node.location,
+        port: node.port,
+        protocol: node.protocol,
         role: master.slice(5) === uid ? NodeRoleEnum.MASTER : NodeRoleEnum.SLAVE,
         uid,
         zone: this.zone,
@@ -181,8 +188,11 @@ class RegistryService {
   public setNodesGlobal = async (): Promise<void> => {
     const nodes = await this.getAllNodes();
     if (nodes.length) {
-      const query = "UPDATE node USING TTL 10 SET ipv4 = ?, role = ? WHERE uid = ? AND zone = ?;";
-      const queries = nodes.map(node => ({query, params: [node.ipv4, node.role, node.uid, node.zone]}));
+      const query = "UPDATE node USING TTL 10 SET ipv4 = ?, location = ?, protocol = ?, port = ?, role = ?" +
+          " WHERE uid = ? AND zone = ?;";
+      const queries = nodes.map(node => (
+          {query, params: [node.ipv4, node.location, node.protocol, node.port, node.role, node.uid, node.zone]}
+          ));
       await this.repository.client.batch(queries, {prepare: true});
     }
   };
