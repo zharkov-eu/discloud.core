@@ -1,7 +1,7 @@
 "use strict";
 
 import config from "../../../config";
-import requestWrapper from "../authrequest";
+import requestWrapper from "../authRequest";
 import IAppTokenRequest from "./interface/appTokenRequest";
 import IUserResponse from "./interface/userResponse";
 import IUserTokenRequest from "./interface/userTokenRequest";

@@ -1,0 +1,11 @@
+version: '2.2'
+
+services:
+  discloud-core:
+    image: discloud-core
+    build: .
+    restart: always
+    ports:
+      - 9010:80
+    container_name: discloud-core
+    mem_limit: 512M

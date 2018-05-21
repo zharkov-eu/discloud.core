@@ -55,7 +55,7 @@ export class App {
   }
 
   public startServer = async (options: IAppOptions = {}) => {
-    const port = options.port || 8000;
+    const port = options.port || process.env["NODE_PORT"] || 8000;
 
     this.server.acceptable = ["application/json", "application/octet-stream"];
 
