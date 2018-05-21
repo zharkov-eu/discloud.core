@@ -36,7 +36,7 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
       options.registryService, options.groupService, options.userService);
 
   const entryController = new MasterEntryController(entryService, options.userService);
-  const fileController = new MasterFileController(options.node, options.masterFileService);
+  const fileController = new MasterFileController(options.node, entryService, options.masterFileService);
   const groupController = new GroupController(options.groupService);
   const userController = new UserController(options.userService);
 
@@ -44,24 +44,25 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
     server[method](path, asyncWrapper(fun));
   };
 
-  addRoute("post", "/entry/:userid/", entryController.post);
+  addRoute("post", "/entry/:userid(\\d+)/", entryController.post);
 
-  addRoute("patch", "/entry/:userid/entry/:entryuid", entryController.patchEntry);
-  addRoute("del", "/entry/:userid/entry/:entryuid", entryController.delEntry);
+  addRoute("patch", "/entry/:userid(\\d+)/entry/:entryuid", entryController.patchEntry);
+  addRoute("del", "/entry/:userid(\\d+)/entry/:entryuid", entryController.delEntry);
 
-  addRoute("patch", "/entry/:userid/path/:path", entryController.patchPath);
-  addRoute("del", "/entry/:userid/path/:path", entryController.delPath);
+  addRoute("patch", "/entry/:userid(\\d+)/path/:path", entryController.patchPath);
+  addRoute("del", "/entry/:userid(\\d+)/path/:path", entryController.delPath);
 
   addRoute("get", "/group", groupController.getAll);
   addRoute("post", "/group", groupController.post);
-  addRoute("get", "/group/:id", groupController.get);
-  addRoute("patch", "/group/:id", groupController.patch);
-  addRoute("del", "/group/:id", groupController.del);
+  addRoute("get", "/group/:id(\\d+)", groupController.get);
+  addRoute("patch", "/group/:id(\\d+)", groupController.patch);
+  addRoute("del", "/group/:id(\\d+)", groupController.del);
 
   addRoute("post", "/user", userController.post);
-  addRoute("get", "/user/:id", userController.get);
-  addRoute("patch", "/user/:id", userController.patch);
-  addRoute("del", "/user/:id", userController.del);
+  addRoute("get", "/user/:id(\\d+)", userController.get);
+  addRoute("patch", "/user/:id(\\d+)", userController.patch);
+  addRoute("del", "/user/:id(\\d+)", userController.del);
 
-  addRoute("post", "/upload/:userid/:entryuid", fileController.post);
+  addRoute("get", "/upload/:userid(\\d+)/:entryuid", fileController.getByUuidMaster);
+  addRoute("post", "/upload/:userid(\\d+)/:entryuid", fileController.post);
 }

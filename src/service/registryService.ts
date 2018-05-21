@@ -3,7 +3,6 @@
 import {RedisClient} from "redis";
 import {promisify} from "util";
 import {v4} from "uuid";
-import config from "../../config";
 import INode, {INodeRedis, NodeRoleEnum} from "../interface/node";
 import {getNetworkInterfaces} from "../lib/ip";
 import CassandraRepository from "../repository/cassandra";
@@ -33,24 +32,26 @@ function initClient(redisClient: RedisClient) {
 class RegistryService {
   private static convertRow(row: { [key: string]: any }): INode {
     return {
+      host: row.host,
       ipv4: row.ipv4,
-      location: row.location,
       port: row.port,
       protocol: row.protocol,
       role: row.role,
-      uid: row.uid,
+      uid: row.uid.toString(),
       zone: row.zone,
     };
   }
 
+  private readonly ipv4: string;
   private readonly zone: string;
   private readonly repository: CassandraRepository;
 
-  constructor(redisClient: RedisClient, repository: CassandraRepository, options: { zone: string }) {
+  constructor(redisClient: RedisClient, repository: CassandraRepository, options: { ipv4: string, zone: string }) {
     if (!client) {
       initClient(redisClient);
     }
     this.repository = repository;
+    this.ipv4 = options.ipv4;
     this.zone = options.zone;
   }
 
@@ -61,10 +62,10 @@ class RegistryService {
    */
   public getIPv4 = (): string => {
     const ifaces = getNetworkInterfaces();
-    if (!config.ipv4 && Object.keys(ifaces).length === 0) {
+    if (!this.ipv4 && Object.keys(ifaces).length === 0) {
       throw new Error("Please specify IPv4 address");
     }
-    return config.ipv4 || Object.keys(ifaces)[0];
+    return this.ipv4 || Object.keys(ifaces)[0];
   };
 
   /**
@@ -75,6 +76,7 @@ class RegistryService {
    */
   public registerNode = async (node: INodeRedis, uid?: string): Promise<string> => {
     uid = uid || v4();
+    if (uid) await this.checkNodeMap();
     const code = await hsetnxAsync("node", uid, JSON.stringify(node));
     return (code !== 1) ? this.registerNode(node) : Promise.resolve(uid);
   };
@@ -157,7 +159,7 @@ class RegistryService {
       const node: INodeRedis = JSON.parse(nodeMap[uid]);
       nodes.push({
         ipv4: node.ipv4,
-        location: node.location,
+        host: node.host,
         port: node.port,
         protocol: node.protocol,
         role: master.slice(5) === uid ? NodeRoleEnum.MASTER : NodeRoleEnum.SLAVE,
@@ -176,7 +178,7 @@ class RegistryService {
     const query = "SELECT * FROM node;";
     const result = await this.repository.client.execute(query, [], {prepare: true});
     if (result.rowLength === 0) {
-      return undefined;
+      return [];
     }
     return result.rows.map(row => RegistryService.convertRow(row));
   };
@@ -188,11 +190,11 @@ class RegistryService {
   public setNodesGlobal = async (): Promise<void> => {
     const nodes = await this.getAllNodes();
     if (nodes.length) {
-      const query = "UPDATE node USING TTL 10 SET ipv4 = ?, location = ?, protocol = ?, port = ?, role = ?" +
+      const query = "UPDATE node USING TTL 10 SET ipv4 = ?, host = ?, protocol = ?, port = ?, role = ?" +
           " WHERE uid = ? AND zone = ?;";
       const queries = nodes.map(node => (
-          {query, params: [node.ipv4, node.location, node.protocol, node.port, node.role, node.uid, node.zone]}
-          ));
+          {query, params: [node.ipv4, node.host, node.protocol, node.port, node.role, node.uid, node.zone]}
+      ));
       await this.repository.client.batch(queries, {prepare: true});
     }
   };

@@ -7,7 +7,7 @@ import CassandraRepository from "./repository/cassandra";
 import RegistryService from "./service/registryService";
 
 interface INodeOptions {
-  location?: string;
+  host?: string;
   port?: number;
   protocol?: string;
   uid?: string;
@@ -20,7 +20,7 @@ class NodeWorker {
 
   private uid: string;
   private ipv4: string;
-  private location: string;
+  private host: string;
   private port: number;
   private protocol: string;
   private role: NodeRoleEnum;
@@ -38,13 +38,13 @@ class NodeWorker {
     this.zone = options.zone;
     this.port = options.port || 80;
     this.protocol = options.protocol || "http";
-    this.location = options.location || "localhost";
-    this.registryService = new RegistryService(client, repository, {zone: options.zone});
+    this.host = options.host || "localhost";
+    this.registryService = new RegistryService(client, repository, {ipv4: options.ipv4, zone: options.zone});
   }
 
   public getNodeInfo = (): INode => ({
+    host: this.host,
     ipv4: this.ipv4,
-    location: this.location,
     port: this.port,
     protocol: this.protocol,
     role: this.role === NodeRoleEnum.MASTER ? NodeRoleEnum.MASTER : NodeRoleEnum.SLAVE,
@@ -61,8 +61,8 @@ class NodeWorker {
   public register = async (): Promise<string> => {
     this.ipv4 = this.ipv4 || this.registryService.getIPv4();
     this.uid = await this.registryService.registerNode({
+      host: this.host,
       ipv4: this.ipv4,
-      location: this.location,
       port: this.port,
       protocol: this.protocol,
     }, this.uid);

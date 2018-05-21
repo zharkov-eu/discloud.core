@@ -1,6 +1,8 @@
 "use strict";
 
+import * as fs from "fs";
 import * as fse from "fs-extra";
+import * as http from "http";
 import * as path from "path";
 import {NotFoundError} from "restify-errors";
 import LocationStatus from "../interface/locationStatus";
@@ -45,6 +47,16 @@ export default class SlaveFileService extends AbstractFileService {
       const locationDirectory = entry.locationPath.split("/").slice(0, locationPath.length - 1);
 
       await fse.ensureDir(path.join(this.rootPath, ...locationDirectory));
+
+      const writeStream = fs.createWriteStream(path.join(this.rootPath, ...locationPath));
+      http.get({
+        host: file.origin.host || file.origin.ipv4,
+        path: `/upload/${entry.owner}/${entry.uuid}`,
+        port: file.origin.port,
+        protocol: file.origin.protocol,
+      }, (res) => {
+        res.pipe(writeStream);
+      });
     }
   };
 

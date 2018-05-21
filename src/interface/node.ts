@@ -7,7 +7,7 @@ export enum NodeRoleEnum {
 
 export interface INodeRedis {
   ipv4: string;
-  location: string;
+  host: string;
   protocol: string;
   port: number;
 }
@@ -15,7 +15,7 @@ export interface INodeRedis {
 export default interface INode {
   uid: string;
   ipv4: string;
-  location: string;
+  host: string;
   protocol: string;
   port: number;
   role: NodeRoleEnum;

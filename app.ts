@@ -54,8 +54,8 @@ export class App {
     });
   }
 
-  public startServer = async (config: INodeConfig = {}, options: IAppOptions = {}) => {
-    const port = options.port || config.port || 8000;
+  public startServer = async (options: IAppOptions = {}) => {
+    const port = options.port || 8000;
 
     this.server.acceptable = ["application/json", "application/octet-stream"];
 

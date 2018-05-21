@@ -52,6 +52,12 @@ export default class MasterFileService extends AbstractFileService {
           return AbstractEntryService.stringifyLocation(node);
         });
 
-    this.pubFileService.publish({location, size: entry.size, userId: options.userId, uuid: entry.uuid});
+    this.pubFileService.publish({
+      location,
+      origin: this.node,
+      size: entry.size,
+      userId: options.userId,
+      uuid: entry.uuid,
+    });
   };
 }

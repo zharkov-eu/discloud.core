@@ -22,7 +22,7 @@ describe("User API test", () => {
     //   resolveWithFullResponse: true,
     // });
     // assert.strictEqual(createUserFullResponse.statusCode, 201);
-    // assert.strictEqual(createUserFullResponse.headers.location, `/user/${userRequest.username}`);
+    // assert.strictEqual(createUserFullResponse.headers.host, `/user/${userRequest.username}`);
     // const createUserResponse: IUserResponse = createUserFullResponse.body;
     // assert.strictEqual(createUserResponse.username, userRequest.username);
     // assert.deepStrictEqual(createUserResponse.group, userRequest.group);

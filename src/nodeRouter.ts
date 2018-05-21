@@ -31,7 +31,7 @@ export function NodeRouter(server: restify.Server, options: IRouterOptions) {
   };
 
   const nodeController = new NodeController(options.node, options.registryService);
-  const fileController = new NodeFileController(options.slaveEntryService);
+  const fileController = new NodeFileController(options.slaveEntryService, options.registryService);
   const entryController = new NodeEntryController(options.slaveEntryService, options.userService);
 
   addRoute("get", "/node/global", nodeController.getAllGlobal);

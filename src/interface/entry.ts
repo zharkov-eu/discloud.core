@@ -24,6 +24,6 @@ export default interface IEntry {
   created: number; // Entry created timestamp
   size?: number; // Entry size in kilobytes
   lastModify: number; // Entry last modify timestamp
-  location: string[]; // Nodes of physical content location
-  locationPath: string; // Physical location on nodes
+  location: string[]; // Nodes of physical content host
+  locationPath: string; // Physical host on nodes
 }

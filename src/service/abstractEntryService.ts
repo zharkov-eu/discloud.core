@@ -32,7 +32,7 @@ export default abstract class AbstractEntryService {
     permission: row.permission,
     share: row.share,
     type: row.type,
-    uuid: row.uuid,
+    uuid: row.uuid.toString(),
   });
 
   protected readonly repository: CassandraRepository;

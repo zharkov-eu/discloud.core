@@ -1,0 +1,1959 @@
+{
+	"id": "95d6610e-7538-4d3a-99f0-205744125835",
+	"name": "Discloud.Core",
+	"description": "",
+	"auth": null,
+	"events": null,
+	"variables": [],
+	"order": [],
+	"folders_order": [
+		"a2fbddfc-3966-4879-a2cb-856d4d05d875",
+		"7572669e-0000-485d-a555-d1c2aa8f428e",
+		"1a8204ce-6490-42e3-b5c5-83c8b2ad5f0a",
+		"245e162b-4eaf-42b9-9bb6-41f35e2c0900",
+		"1bb755dc-cb2e-4a55-bef0-8bbc37365b39"
+	],
+	"folders": [
+		{
+			"id": "245e162b-4eaf-42b9-9bb6-41f35e2c0900",
+			"name": "Entry",
+			"description": "",
+			"auth": null,
+			"events": null,
+			"collection": "95d6610e-7538-4d3a-99f0-205744125835",
+			"folder": null,
+			"order": [
+				"2af06c20-1518-44cf-92dc-2b570f8f2a9e",
+				"b7e354d9-b575-42b5-bc25-60b05b262a92"
+			],
+			"folders_order": []
+		},
+		{
+			"id": "1bb755dc-cb2e-4a55-bef0-8bbc37365b39",
+			"name": "File",
+			"description": "",
+			"auth": null,
+			"events": null,
+			"collection": "95d6610e-7538-4d3a-99f0-205744125835",
+			"folder": null,
+			"order": [
+				"1f70dfde-bc9b-4e29-8e7e-a30dd6d6cd76",
+				"cb4e2e1a-11bf-4ab0-bfe9-a8a79b9f7d52",
+				"b54957a9-c420-4da1-8717-6486a958dcc7"
+			],
+			"folders_order": []
+		},
+		{
+			"id": "a2fbddfc-3966-4879-a2cb-856d4d05d875",
+			"name": "Group",
+			"description": "",
+			"auth": null,
+			"events": null,
+			"collection": "95d6610e-7538-4d3a-99f0-205744125835",
+			"folder": null,
+			"order": [
+				"170eeb3b-ec1d-40fe-96ff-5451654cea2f",
+				"27205839-9acf-4756-820e-c66b419793f3",
+				"a814bef9-e48c-46f7-b7ed-2f6b35883f5a",
+				"a61ff605-a3f8-4625-b862-71f1174bf422",
+				"db03b506-4187-4b1d-9254-0571222a538e"
+			],
+			"folders_order": []
+		},
+		{
+			"id": "7572669e-0000-485d-a555-d1c2aa8f428e",
+			"name": "Node",
+			"description": "",
+			"auth": null,
+			"events": null,
+			"collection": "95d6610e-7538-4d3a-99f0-205744125835",
+			"folder": null,
+			"order": [
+				"036b1775-13f0-4d02-b181-c1c90e2c4176",
+				"70ded5ee-c57d-40cb-b632-7cc69b235bb4",
+				"14372942-09cf-4925-9328-5727c447ca01",
+				"00e41b3d-b79e-45ad-a7ef-3eb463764780"
+			],
+			"folders_order": []
+		},
+		{
+			"id": "1a8204ce-6490-42e3-b5c5-83c8b2ad5f0a",
+			"name": "User",
+			"description": "",
+			"auth": null,
+			"events": null,
+			"collection": "95d6610e-7538-4d3a-99f0-205744125835",
+			"folder": null,
+			"order": [
+				"8df8fea9-7233-42c2-a661-b96857371632",
+				"8ab74aeb-7b70-497d-a8e6-4f9a6793dcc4",
+				"7a80d18a-fff1-4997-b3b4-5156111c00ff"
+			],
+			"folders_order": []
+		}
+	],
+	"requests": [
+		{
+			"id": "00e41b3d-b79e-45ad-a7ef-3eb463764780",
+			"name": "Update User",
+			"url": "{{protocol}}://{{apiUrl}}/user/1",
+			"description": "",
+			"data": [],
+			"dataMode": "raw",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"method": "PATCH",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "7572669e-0000-485d-a555-d1c2aa8f428e",
+			"responses": [
+				{
+					"id": "a184429e-8ebf-4876-84ee-3d3e5273cae4",
+					"name": "Update User (Not Found)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"code\":\"NotFound\",\"message\":\"User by id {'1'} not found\"}",
+					"responseCode": {
+						"code": 404,
+						"name": "Not Found",
+						"detail": "The requested resource could not be found but may be available again in the future. Subsequent requests by the client are permissible."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/user/1",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"data": "{\n\t\"group\": [1],\n\t\"password\": \"passwordsecret\"\n}",
+						"method": "PATCH",
+						"dataMode": "raw"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "58",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 08:00:57 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:4e1b40ec-a661-4e9b-8e87-8f54755a3760",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "00e41b3d-b79e-45ad-a7ef-3eb463764780",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				},
+				{
+					"id": "fb2fa733-3f3a-4d16-bc46-615e5c564687",
+					"name": "Update User (Bad Request)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"code\":\"BadRequest\",\"message\":\"\"}",
+					"responseCode": {
+						"code": 400,
+						"name": "Bad Request",
+						"detail": "The request cannot be fulfilled due to bad syntax."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/user/1",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"data": "{\n\t\"group\": [],\n\t\"password\": 1\n}",
+						"method": "PATCH",
+						"dataMode": "raw"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "34",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 07:59:21 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:4e1b40ec-a661-4e9b-8e87-8f54755a3760",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "00e41b3d-b79e-45ad-a7ef-3eb463764780",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				}
+			],
+			"rawModeData": "{\n\t\"group\": [1],\n\t\"password\": \"passwordsecret\"\n}",
+			"headers": "Content-Type: application/json\n",
+			"pathVariables": {}
+		},
+		{
+			"id": "036b1775-13f0-4d02-b181-c1c90e2c4176",
+			"name": "Get Global Nodes",
+			"url": "{{protocol}}://{{apiUrl}}/node/global",
+			"description": "",
+			"data": null,
+			"dataMode": "params",
+			"headerData": [],
+			"method": "GET",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "7572669e-0000-485d-a555-d1c2aa8f428e",
+			"responses": [
+				{
+					"id": "0028e396-6c01-45ab-8db2-c40585ed62bd",
+					"name": "Get Global Nodes (Success)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "[{\"ipv4\":\"127.0.0.1\",\"role\":\"slave\",\"uid\":\"ce444373-cd7d-426c-bf60-8681b19743b4\",\"zone\":\"local\"},{\"ipv4\":\"127.0.0.1\",\"role\":\"master\",\"uid\":\"acbf9f1a-81bf-4e0b-93a6-ea553dbd1c99\",\"zone\":\"local\"}]",
+					"responseCode": {
+						"code": 200,
+						"name": "OK",
+						"detail": "Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request the response will contain an entity describing or containing the result of the action."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/node/global",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [],
+						"data": null,
+						"method": "GET",
+						"dataMode": "params"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "194",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 06:47:33 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:acbf9f1a-81bf-4e0b-93a6-ea553dbd1c99",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "036b1775-13f0-4d02-b181-c1c90e2c4176",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				}
+			],
+			"headers": "",
+			"pathVariables": {}
+		},
+		{
+			"id": "14372942-09cf-4925-9328-5727c447ca01",
+			"name": "Get Current Node",
+			"url": "{{protocol}}://{{apiUrl}}/node/current",
+			"description": "",
+			"data": null,
+			"dataMode": "params",
+			"headerData": [],
+			"method": "GET",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "7572669e-0000-485d-a555-d1c2aa8f428e",
+			"responses": [
+				{
+					"id": "c5b92a7b-095e-4f1a-8ad7-773ffb0b08fc",
+					"name": "Get Current Node (Master)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"ipv4\":\"127.0.0.1\",\"role\":\"master\",\"uid\":\"acbf9f1a-81bf-4e0b-93a6-ea553dbd1c99\",\"zone\":\"local\"}",
+					"responseCode": {
+						"code": 200,
+						"name": "OK",
+						"detail": "Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request the response will contain an entity describing or containing the result of the action."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/node/current",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [],
+						"data": null,
+						"method": "GET",
+						"dataMode": "params"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "96",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 06:50:04 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:acbf9f1a-81bf-4e0b-93a6-ea553dbd1c99",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "14372942-09cf-4925-9328-5727c447ca01",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				}
+			],
+			"headers": "",
+			"pathVariables": {}
+		},
+		{
+			"id": "170eeb3b-ec1d-40fe-96ff-5451654cea2f",
+			"name": "Add Group",
+			"url": "{{protocol}}://{{apiUrl}}/group",
+			"description": "",
+			"data": [],
+			"dataMode": "raw",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"method": "POST",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "a2fbddfc-3966-4879-a2cb-856d4d05d875",
+			"responses": [
+				{
+					"id": "251e9e92-cca9-44cb-abae-53f177bd1ccd",
+					"name": "Add Group (Conflict)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"code\":\"Conflict\",\"message\":\"Group 'admin' already exist\"}",
+					"responseCode": {
+						"code": 409,
+						"name": "Conflict",
+						"detail": "Indicates that the request could not be processed because of conflict in the request, such as an edit conflict."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/group",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"data": "{\n\t\"name\": \"admin\",\n\t\"system\": true\n}",
+						"method": "POST",
+						"dataMode": "raw"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "59",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 05:54:32 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:664d7d1b-5dfa-4a1c-9834-9ea9cbd236be",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "170eeb3b-ec1d-40fe-96ff-5451654cea2f",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				},
+				{
+					"id": "3579b903-d3ea-43ab-8dbb-10e51cb9dca8",
+					"name": "Add Group (Success)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"id\":\"1\",\"name\":\"admin\",\"system\":true}",
+					"responseCode": {
+						"code": 201,
+						"name": "Created",
+						"detail": "The request has been fulfilled and resulted in a new resource being created."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/group",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"data": "{\n\t\"name\": \"admin\",\n\t\"system\": true\n}",
+						"method": "POST",
+						"dataMode": "raw"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "39",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 05:53:43 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:664d7d1b-5dfa-4a1c-9834-9ea9cbd236be",
+							"name": "Server",
+							"description": "A name for the server"
+						},
+						{
+							"key": "location",
+							"value": "/group/1",
+							"name": "location",
+							"description": "Used in redirection, or when a new resource has been created."
+						}
+					],
+					"cookies": [],
+					"request": "170eeb3b-ec1d-40fe-96ff-5451654cea2f",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				},
+				{
+					"id": "7987578b-c552-4ed8-96cf-8c2825aa0a97",
+					"name": "Add Group (Bad Request)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"code\":\"BadRequest\",\"message\":\"\"}",
+					"responseCode": {
+						"code": 400,
+						"name": "Bad Request",
+						"detail": "The request cannot be fulfilled due to bad syntax."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/group",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"data": "{\n\t\"name\": true,\n\t\"system\": \"false\"\n}",
+						"method": "POST",
+						"dataMode": "raw"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "34",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 05:55:05 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:664d7d1b-5dfa-4a1c-9834-9ea9cbd236be",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "170eeb3b-ec1d-40fe-96ff-5451654cea2f",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				}
+			],
+			"rawModeData": "{\n\t\"name\": \"admin\",\n\t\"system\": true\n}",
+			"headers": "Content-Type: application/json\n",
+			"pathVariables": {}
+		},
+		{
+			"id": "1f70dfde-bc9b-4e29-8e7e-a30dd6d6cd76",
+			"name": "Upload File",
+			"url": "{{protocol}}://{{apiUrl}}/upload/1/039fea90-c10d-4d4d-a58e-5056a76cd8d5",
+			"description": "",
+			"data": [
+				{
+					"key": "file",
+					"description": "",
+					"type": "file",
+					"enabled": true
+				}
+			],
+			"dataMode": "params",
+			"headerData": [],
+			"method": "POST",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "1bb755dc-cb2e-4a55-bef0-8bbc37365b39",
+			"headers": "",
+			"pathVariables": {}
+		},
+		{
+			"id": "27205839-9acf-4756-820e-c66b419793f3",
+			"name": "Get Groups",
+			"url": "{{protocol}}://{{apiUrl}}/group",
+			"description": "",
+			"data": null,
+			"dataMode": "params",
+			"headerData": [],
+			"method": "GET",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "a2fbddfc-3966-4879-a2cb-856d4d05d875",
+			"responses": [
+				{
+					"id": "726967f6-8519-4d82-b270-eb95947ccc24",
+					"name": "Get Groups",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "[{\"id\":1,\"name\":\"admin\",\"system\":true}]",
+					"responseCode": {
+						"code": 200,
+						"name": "OK",
+						"detail": "Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request the response will contain an entity describing or containing the result of the action."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/group",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [],
+						"data": null,
+						"method": "GET",
+						"dataMode": "params"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "39",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 05:59:03 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:24995adf-6e47-401a-b161-3ad2787e9211",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "27205839-9acf-4756-820e-c66b419793f3",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				}
+			],
+			"headers": "",
+			"pathVariables": {}
+		},
+		{
+			"id": "2af06c20-1518-44cf-92dc-2b570f8f2a9e",
+			"name": "Save Entry",
+			"url": "{{protocol}}://{{apiUrl}}/entry/1/",
+			"description": "",
+			"data": [],
+			"dataMode": "raw",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"method": "POST",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "245e162b-4eaf-42b9-9bb6-41f35e2c0900",
+			"responses": [
+				{
+					"id": "353baa1f-ec41-48a8-8f1f-cbc2c06c24c2",
+					"name": "Save Entry (Success)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"created\":1526922280522,\"group\":1,\"lastModify\":1526922280522,\"location\":[\"a2aeb678-a4c5-4891-8eff-fb7d07255364:::1\"],\"name\":\"hello.txt\",\"owner\":1,\"path\":\"/\",\"permission\":\"644\",\"type\":\"f\",\"upload\":\"/upload/1/039fea90-c10d-4d4d-a58e-5056a76cd8d5\",\"uuid\":\"039fea90-c10d-4d4d-a58e-5056a76cd8d5\"}",
+					"responseCode": {
+						"code": 201,
+						"name": "Created",
+						"detail": "The request has been fulfilled and resulted in a new resource being created."
+					},
+					"requestObject": {
+						"url": "localhost:8000/entry/1/",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"data": "{\n\t\"name\": \"hello.txt\",\n    \"type\": \"f\",\n    \"filetype\": \"application/txt\",\n    \"path\": \"/\",\n    \"owner\": 1,\n    \"group\": 1,\n    \"permission\": \"644\",\n    \"share\": null,\n    \"location\": [\"a2aeb678-a4c5-4891-8eff-fb7d07255364\"]\n}",
+						"method": "POST",
+						"dataMode": "raw"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "292",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Mon, 21 May 2018 17:04:40 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Location",
+							"value": "/upload/1/039fea90-c10d-4d4d-a58e-5056a76cd8d5",
+							"name": "Location",
+							"description": "Used in redirection, or when a new resource has been created."
+						},
+						{
+							"key": "Server",
+							"value": "discloud:a2aeb678-a4c5-4891-8eff-fb7d07255364",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [
+						{
+							"domain": "localhost",
+							"expirationDate": 2147483647,
+							"httpOnly": false,
+							"name": "local_cs_id",
+							"path": "/",
+							"secure": false,
+							"url": "http://localhost:8000",
+							"value": "%2F2af1vlyA5Q00Y%2FeSICwxKWRhJM%3D_4055079"
+						}
+					],
+					"request": "2af06c20-1518-44cf-92dc-2b570f8f2a9e",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				}
+			],
+			"rawModeData": "{\n\t\"name\": \"hello.txt\",\n    \"type\": \"f\",\n    \"filetype\": \"application/txt\",\n    \"path\": \"/\",\n    \"owner\": 1,\n    \"group\": 1,\n    \"permission\": \"644\",\n    \"share\": null,\n    \"location\": [\"a2aeb678-a4c5-4891-8eff-fb7d07255364\"]\n}",
+			"headers": "Content-Type: application/json\n",
+			"pathVariables": {}
+		},
+		{
+			"id": "70ded5ee-c57d-40cb-b632-7cc69b235bb4",
+			"name": "Get Local Nodes",
+			"url": "{{protocol}}://{{apiUrl}}/node/local",
+			"description": "",
+			"data": null,
+			"dataMode": "params",
+			"headerData": [],
+			"method": "GET",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "7572669e-0000-485d-a555-d1c2aa8f428e",
+			"responses": [
+				{
+					"id": "f5e26b36-fc3d-4020-8414-e4911afb5dd4",
+					"name": "Get Local Nodes (Success)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "[{\"ipv4\":\"127.0.0.1\",\"role\":\"master\",\"uid\":\"acbf9f1a-81bf-4e0b-93a6-ea553dbd1c99\",\"zone\":\"local\"},{\"ipv4\":\"127.0.0.1\",\"role\":\"slave\",\"uid\":\"ce444373-cd7d-426c-bf60-8681b19743b4\",\"zone\":\"local\"}]",
+					"responseCode": {
+						"code": 200,
+						"name": "OK",
+						"detail": "Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request the response will contain an entity describing or containing the result of the action."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/node/local",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [],
+						"data": null,
+						"method": "GET",
+						"dataMode": "params"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "194",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 06:46:40 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:acbf9f1a-81bf-4e0b-93a6-ea553dbd1c99",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "70ded5ee-c57d-40cb-b632-7cc69b235bb4",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				}
+			],
+			"headers": "",
+			"pathVariables": {}
+		},
+		{
+			"id": "7a80d18a-fff1-4997-b3b4-5156111c00ff",
+			"name": "Delete User",
+			"url": "{{protocol}}://{{apiUrl}}/user/4",
+			"description": "",
+			"data": null,
+			"dataMode": "params",
+			"headerData": [],
+			"method": "DELETE",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "1a8204ce-6490-42e3-b5c5-83c8b2ad5f0a",
+			"responses": [
+				{
+					"id": "18f2c7c7-2e0a-45a4-82e6-7f3e6e4dd6ba",
+					"name": "Delete User (Success)",
+					"status": "",
+					"mime": "",
+					"language": "plain",
+					"text": "",
+					"responseCode": {
+						"code": 204,
+						"name": "No Content",
+						"detail": "The server successfully processed the request, but is not returning any content."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/user/4",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [],
+						"data": null,
+						"method": "DELETE",
+						"dataMode": "params"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 07:56:51 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:4e1b40ec-a661-4e9b-8e87-8f54755a3760",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "7a80d18a-fff1-4997-b3b4-5156111c00ff",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				},
+				{
+					"id": "34a9014f-05a6-4919-89dd-8a506020c680",
+					"name": "Delete User (Not Found)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"code\":\"NotFound\",\"message\":\"User by id {'4'} not found\"}",
+					"responseCode": {
+						"code": 404,
+						"name": "Not Found",
+						"detail": "The requested resource could not be found but may be available again in the future. Subsequent requests by the client are permissible."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/user/4",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [],
+						"data": null,
+						"method": "DELETE",
+						"dataMode": "params"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "58",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 07:57:08 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:4e1b40ec-a661-4e9b-8e87-8f54755a3760",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "7a80d18a-fff1-4997-b3b4-5156111c00ff",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				}
+			],
+			"headers": "",
+			"pathVariables": {}
+		},
+		{
+			"id": "8ab74aeb-7b70-497d-a8e6-4f9a6793dcc4",
+			"name": "Get User",
+			"url": "{{protocol}}://{{apiUrl}}/user/1",
+			"description": "",
+			"data": null,
+			"dataMode": "params",
+			"headerData": [],
+			"method": "GET",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "1a8204ce-6490-42e3-b5c5-83c8b2ad5f0a",
+			"responses": [
+				{
+					"id": "9257e09f-ab60-4e68-b655-1c85d1bcf6d4",
+					"name": "Get User (Success)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"id\":4,\"username\":\"user\",\"group\":[2]}",
+					"responseCode": {
+						"code": 200,
+						"name": "OK",
+						"detail": "Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request the response will contain an entity describing or containing the result of the action."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/user/4",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [],
+						"data": null,
+						"method": "GET",
+						"dataMode": "params"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "38",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 07:54:59 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:963703ad-e31a-45ed-9245-f6ae3e4657ec",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "8ab74aeb-7b70-497d-a8e6-4f9a6793dcc4",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				},
+				{
+					"id": "d14a3d5f-753b-412c-9d22-b30d3d0dc8cb",
+					"name": "Get User (Not Found)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"code\":\"NotFound\",\"message\":\"User by id {'1'} not found\"}",
+					"responseCode": {
+						"code": 404,
+						"name": "Not Found",
+						"detail": "The requested resource could not be found but may be available again in the future. Subsequent requests by the client are permissible."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/user/1",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [],
+						"data": null,
+						"method": "GET",
+						"dataMode": "params"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "58",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 07:54:00 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:963703ad-e31a-45ed-9245-f6ae3e4657ec",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "8ab74aeb-7b70-497d-a8e6-4f9a6793dcc4",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				}
+			],
+			"headers": "",
+			"pathVariables": {}
+		},
+		{
+			"id": "8df8fea9-7233-42c2-a661-b96857371632",
+			"name": "Create User",
+			"url": "{{protocol}}://{{apiUrl}}/user",
+			"description": "",
+			"data": [],
+			"dataMode": "raw",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"method": "POST",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "1a8204ce-6490-42e3-b5c5-83c8b2ad5f0a",
+			"responses": [
+				{
+					"id": "206485d2-c44a-4d59-8dfa-eb253f9bd6e5",
+					"name": "Create User (Confict)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"code\":\"Conflict\",\"message\":\"User 'user' already exist\"}",
+					"responseCode": {
+						"code": 409,
+						"name": "Conflict",
+						"detail": "Indicates that the request could not be processed because of conflict in the request, such as an edit conflict."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/user",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"data": "{\n\t\"username\": \"user\",\n\t\"group\": [1, 2],\n\t\"password\": \"password\"\n}",
+						"method": "POST",
+						"dataMode": "raw"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "57",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 07:52:55 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:963703ad-e31a-45ed-9245-f6ae3e4657ec",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "8df8fea9-7233-42c2-a661-b96857371632",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				},
+				{
+					"id": "69cfc046-1a7f-47f0-b8e2-f31b4fb45cad",
+					"name": "Create User (Success)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"id\":\"2\",\"username\":\"user\",\"group\":[1,2]}",
+					"responseCode": {
+						"code": 201,
+						"name": "Created",
+						"detail": "The request has been fulfilled and resulted in a new resource being created."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/user",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"data": "{\n\t\"username\": \"user\",\n\t\"group\": [1, 2],\n\t\"password\": \"password\"\n}",
+						"method": "POST",
+						"dataMode": "raw"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "42",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 06:54:20 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:acbf9f1a-81bf-4e0b-93a6-ea553dbd1c99",
+							"name": "Server",
+							"description": "A name for the server"
+						},
+						{
+							"key": "location",
+							"value": "/user/2",
+							"name": "location",
+							"description": "Used in redirection, or when a new resource has been created."
+						}
+					],
+					"cookies": [],
+					"request": "8df8fea9-7233-42c2-a661-b96857371632",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				},
+				{
+					"id": "85ea2ee8-812c-48c6-ad9b-f31e69902aac",
+					"name": "Create User (Group Not Found)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"code\":\"NotFound\",\"message\":\"Groups 1 not exists\"}",
+					"responseCode": {
+						"code": 404,
+						"name": "Not Found",
+						"detail": "The requested resource could not be found but may be available again in the future. Subsequent requests by the client are permissible."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/user",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"data": "{\n\t\"username\": \"userB\",\n\t\"group\": [1, 2],\n\t\"password\": \"password\"\n}",
+						"method": "POST",
+						"dataMode": "raw"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "51",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 07:53:22 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:963703ad-e31a-45ed-9245-f6ae3e4657ec",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "8df8fea9-7233-42c2-a661-b96857371632",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				},
+				{
+					"id": "b260469d-a6a0-43d5-a3f9-36b6a57feff0",
+					"name": "Create User (Bad Request)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"code\":\"BadRequest\",\"message\":\"\"}",
+					"responseCode": {
+						"code": 400,
+						"name": "Bad Request",
+						"detail": "The request cannot be fulfilled due to bad syntax."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/user",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"data": "{\n\t\"username\": true,\n\t\"group\": [1, 2],\n\t\"password\": \"password\"\n}",
+						"method": "POST",
+						"dataMode": "raw"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "34",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 07:57:32 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:4e1b40ec-a661-4e9b-8e87-8f54755a3760",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "8df8fea9-7233-42c2-a661-b96857371632",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				}
+			],
+			"rawModeData": "{\n\t\"username\": \"user\",\n\t\"group\": [1, 2],\n\t\"password\": \"password\"\n}",
+			"headers": "Content-Type: application/json\n",
+			"pathVariables": {}
+		},
+		{
+			"id": "a61ff605-a3f8-4625-b862-71f1174bf422",
+			"name": "Update Group",
+			"url": "{{protocol}}://{{apiUrl}}/group/1",
+			"description": "",
+			"data": [],
+			"dataMode": "raw",
+			"headerData": [
+				{
+					"key": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"method": "PATCH",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "a2fbddfc-3966-4879-a2cb-856d4d05d875",
+			"responses": [
+				{
+					"id": "685e3864-aada-4b9a-9f84-78f2e25a656a",
+					"name": "Update Group (Bad Request)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"code\":\"BadRequest\",\"message\":\"\"}",
+					"responseCode": {
+						"code": 400,
+						"name": "Bad Request",
+						"detail": "The request cannot be fulfilled due to bad syntax."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/group/1",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"data": "{\n\t\"system\": \"false\"\t\n}",
+						"method": "PATCH",
+						"dataMode": "raw"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "34",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 06:07:44 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:316213fd-0d73-44e4-9ee5-14c15027c418",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "a61ff605-a3f8-4625-b862-71f1174bf422",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				},
+				{
+					"id": "c2ef474f-0a35-4cdf-993d-d6881330dd95",
+					"name": "Update Group (Not Found)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"code\":\"NotFound\",\"message\":\"Group by id {'2'} not found\"}",
+					"responseCode": {
+						"code": 404,
+						"name": "Not Found",
+						"detail": "The requested resource could not be found but may be available again in the future. Subsequent requests by the client are permissible."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/group/2",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"data": "{\n\t\"system\": false\t\n}",
+						"method": "PATCH",
+						"dataMode": "raw"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "59",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 06:07:19 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:316213fd-0d73-44e4-9ee5-14c15027c418",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "a61ff605-a3f8-4625-b862-71f1174bf422",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				},
+				{
+					"id": "e2cb904f-088d-41ea-949e-775d6bc31cf5",
+					"name": "Update Group (Successful)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"id\":1,\"name\":\"admin\",\"system\":false}",
+					"responseCode": {
+						"code": 200,
+						"name": "OK",
+						"detail": "Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request the response will contain an entity describing or containing the result of the action."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/group/1",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"disabled": false
+							}
+						],
+						"data": "{\n\t\"system\": false\t\n}",
+						"method": "PATCH",
+						"dataMode": "raw"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "38",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 06:06:37 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:316213fd-0d73-44e4-9ee5-14c15027c418",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "a61ff605-a3f8-4625-b862-71f1174bf422",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				}
+			],
+			"rawModeData": "{\n\t\"system\": false\t\n}",
+			"headers": "Content-Type: application/json\n",
+			"pathVariables": {}
+		},
+		{
+			"id": "a814bef9-e48c-46f7-b7ed-2f6b35883f5a",
+			"name": "Get Group",
+			"url": "{{protocol}}://{{apiUrl}}/group/1",
+			"description": "",
+			"data": null,
+			"dataMode": "params",
+			"headerData": [],
+			"method": "GET",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "a2fbddfc-3966-4879-a2cb-856d4d05d875",
+			"responses": [
+				{
+					"id": "ac71131e-622a-4595-b994-869d8c4f1599",
+					"name": "Get Group (Success)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"id\":1,\"name\":\"admin\",\"system\":true}",
+					"responseCode": {
+						"code": 200,
+						"name": "OK",
+						"detail": "Standard response for successful HTTP requests. The actual response will depend on the request method used. In a GET request, the response will contain an entity corresponding to the requested resource. In a POST request the response will contain an entity describing or containing the result of the action."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/group/1",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [],
+						"data": null,
+						"method": "GET",
+						"dataMode": "params"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "37",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 05:56:27 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:664d7d1b-5dfa-4a1c-9834-9ea9cbd236be",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "a814bef9-e48c-46f7-b7ed-2f6b35883f5a",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				},
+				{
+					"id": "ba657e3d-f630-4379-9f73-6ffe7749b168",
+					"name": "Get Group (Not Found)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"code\":\"NotFound\",\"message\":\"Group by id {'2'} not found\"}",
+					"responseCode": {
+						"code": 404,
+						"name": "Not Found",
+						"detail": "The requested resource could not be found but may be available again in the future. Subsequent requests by the client are permissible."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/group/2",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [],
+						"data": null,
+						"method": "GET",
+						"dataMode": "params"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "59",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 05:56:49 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:664d7d1b-5dfa-4a1c-9834-9ea9cbd236be",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "a814bef9-e48c-46f7-b7ed-2f6b35883f5a",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				}
+			],
+			"headers": "",
+			"pathVariables": {}
+		},
+		{
+			"id": "b54957a9-c420-4da1-8717-6486a958dcc7",
+			"name": "Get Master File",
+			"url": "{{protocol}}://{{apiUrl}}/upload/1/039fea90-c10d-4d4d-a58e-5056a76cd8d5",
+			"description": "",
+			"data": null,
+			"dataMode": "params",
+			"headerData": [],
+			"method": "GET",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "1bb755dc-cb2e-4a55-bef0-8bbc37365b39",
+			"headers": "",
+			"pathVariables": {}
+		},
+		{
+			"id": "b7e354d9-b575-42b5-bc25-60b05b262a92",
+			"name": "Get Entries",
+			"url": "{{protocol}}://{{apiUrl}}/entry/1/entry",
+			"description": "",
+			"data": null,
+			"dataMode": "params",
+			"headerData": [],
+			"method": "GET",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "245e162b-4eaf-42b9-9bb6-41f35e2c0900",
+			"headers": "",
+			"pathVariables": {}
+		},
+		{
+			"id": "cb4e2e1a-11bf-4ab0-bfe9-a8a79b9f7d52",
+			"name": "Get File",
+			"url": "{{protocol}}://{{apiUrl}}/file/1/uuid/039fea90-c10d-4d4d-a58e-5056a76cd8d5",
+			"description": "",
+			"data": null,
+			"dataMode": "params",
+			"headerData": [],
+			"method": "GET",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "1bb755dc-cb2e-4a55-bef0-8bbc37365b39",
+			"headers": "",
+			"pathVariables": {}
+		},
+		{
+			"id": "db03b506-4187-4b1d-9254-0571222a538e",
+			"name": "Delete Group",
+			"url": "{{protocol}}://{{apiUrl}}/group/1",
+			"description": "",
+			"data": null,
+			"dataMode": "params",
+			"headerData": [],
+			"method": "DELETE",
+			"pathVariableData": [],
+			"queryParams": [],
+			"auth": null,
+			"events": [],
+			"folder": "a2fbddfc-3966-4879-a2cb-856d4d05d875",
+			"responses": [
+				{
+					"id": "99d9242f-6862-467a-807d-5c22a20c924b",
+					"name": "Delete Group (Successful)",
+					"status": "",
+					"mime": "",
+					"language": "plain",
+					"text": "",
+					"responseCode": {
+						"code": 204,
+						"name": "No Content",
+						"detail": "The server successfully processed the request, but is not returning any content."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/group/1",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [],
+						"data": null,
+						"method": "DELETE",
+						"dataMode": "params"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 06:08:52 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:316213fd-0d73-44e4-9ee5-14c15027c418",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "db03b506-4187-4b1d-9254-0571222a538e",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				},
+				{
+					"id": "ab06ed00-63ff-4352-8952-7d6c287dc1f9",
+					"name": "Delete Group (Not Found)",
+					"status": "",
+					"mime": "",
+					"language": "json",
+					"text": "{\"code\":\"NotFound\",\"message\":\"Group by id {'1'} not found\"}",
+					"responseCode": {
+						"code": 404,
+						"name": "Not Found",
+						"detail": "The requested resource could not be found but may be available again in the future. Subsequent requests by the client are permissible."
+					},
+					"requestObject": {
+						"url": "{{protocol}}://{{apiUrl}}/group/1",
+						"pathVariableData": [],
+						"queryParams": [],
+						"headerData": [],
+						"data": null,
+						"method": "DELETE",
+						"dataMode": "params"
+					},
+					"headers": [
+						{
+							"key": "Connection",
+							"value": "keep-alive",
+							"name": "Connection",
+							"description": "Options that are desired for the connection"
+						},
+						{
+							"key": "Content-Length",
+							"value": "59",
+							"name": "Content-Length",
+							"description": "The length of the response body in octets (8-bit bytes)"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "The mime type of this content"
+						},
+						{
+							"key": "Date",
+							"value": "Sat, 19 May 2018 06:09:11 GMT",
+							"name": "Date",
+							"description": "The date and time that the message was sent"
+						},
+						{
+							"key": "Server",
+							"value": "discloud:316213fd-0d73-44e4-9ee5-14c15027c418",
+							"name": "Server",
+							"description": "A name for the server"
+						}
+					],
+					"cookies": [],
+					"request": "db03b506-4187-4b1d-9254-0571222a538e",
+					"collection": "95d6610e-7538-4d3a-99f0-205744125835"
+				}
+			],
+			"headers": "",
+			"pathVariables": {}
+		}
+	]
+}

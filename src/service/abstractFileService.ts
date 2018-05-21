@@ -46,7 +46,7 @@ export default abstract class AbstractFileService {
         params: [[locationUpdatedString], entry.uuid],
         query: `UPDATE entry_${entry.owner} SET location = location + ? WHERE uuid = ?;`,
       };
-      // TODO: разобраться с ситуацией проверки location сразу после удаления, но до вставки
+      // TODO: разобраться с ситуацией проверки host сразу после удаления, но до вставки
       await this.repository.client.batch([locationAddQuery, locationRemoveQuery], {prepare: true});
     }
   };

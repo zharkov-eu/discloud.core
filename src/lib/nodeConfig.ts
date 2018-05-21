@@ -6,7 +6,7 @@ import INodeConfig from "../interface/nodeConfig";
 
 const keysAllowed: Map<string, boolean> = new Map([
   ["bindIp", true],
-  ["location", true],
+  ["host", true],
   ["protocol", true],
   ["port", true],
   ["uid", true],
@@ -25,7 +25,7 @@ export default class NodeConfig implements INodeConfig {
   public protocol: string;
 
   @NotEmptyString()
-  public location: string;
+  public host: string;
 
   @NotEmptyString()
   public bindIp: string;
@@ -73,7 +73,7 @@ export default class NodeConfig implements INodeConfig {
     }
     if (config.port) this.port = config.port;
     if (config.protocol) this.protocol = config.protocol;
-    if (config.location) this.location = config.location;
+    if (config.host) this.host = config.host;
     if (config.zone) this.zone = config.zone;
   }
 }

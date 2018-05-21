@@ -91,7 +91,10 @@ export const init = (options: IBootOptions) => {
     const repository = new CassandraRepository();
 
     const node = new NodeWorker(client, repository, {
+      host: nodeConfig.host,
       ipv4: nodeConfig.bindIp,
+      port: nodeConfig.port,
+      protocol: nodeConfig.protocol,
       uid: nodeConfig.uid,
       zone: nodeConfig.zone,
     });
@@ -114,7 +117,7 @@ export const init = (options: IBootOptions) => {
       userService,
     });
     logger.info({type: LogType.SYSTEM}, "NodeWorker started, uid: " + uid);
-    await app.startServer(nodeConfig, options);
+    await app.startServer(options);
 
     if (node.getNodeInfo().role === NodeRoleEnum.MASTER) {
       masterBehavior(node.getNodeInfo(), app, {repository, redisClient: client, slaveFileService});

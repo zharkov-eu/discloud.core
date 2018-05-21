@@ -10,13 +10,14 @@ export default class MasterFileController {
   private readonly entryService: AbstractEntryService;
   private readonly fileService: MasterFileService;
 
-  constructor(node: INode, fileService: MasterFileService) {
-    this.baseUrl = `${node.protocol}://${node.location || node.ipv4}:${node.port || 80}/`;
+  constructor(node: INode, entryService: AbstractEntryService, fileService: MasterFileService) {
+    this.baseUrl = `${node.protocol}://${node.host || node.ipv4}:${node.port || 80}`;
+    this.entryService = entryService;
     this.fileService = fileService;
   }
 
-  public getMasterByUuid = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
-    const entry = await this.entryService.getByUUID(req.params.userid, req.params.uuid);
+  public getByUuidMaster = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
+    const entry = await this.entryService.getByUUID(req.params.userid, req.params.entryuid);
     const splitPath = entry.path.split("/").filter(it => it !== "");
     const redirectUrl = [this.baseUrl, "data", req.params.userid];
     if (splitPath.length) redirectUrl.push(...splitPath);
@@ -29,6 +30,6 @@ export default class MasterFileController {
       entryUuid: req.params.entryuid,
       userId: parseInt(req.params.userid, 10),
     });
-    res.json(200, {Success: true});
+    res.json(200, {success: true});
   };
 }

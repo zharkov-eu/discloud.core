@@ -22,7 +22,7 @@ const uploadMiddleware = (repository: CassandraRepository) =>
     async (req: restify.Request, res: restify.Response, next: restify.Next) => {
       try {
         const splitPath = req.getUrl().path.split("/");
-        if (splitPath[1] === "upload") {
+        if (req.method === "post" && splitPath[1] === "upload") {
           const id = parseInt(splitPath[2], 10);
           const uuid = splitPath[3];
 
