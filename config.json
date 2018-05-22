@@ -1,6 +1,6 @@
 {
   "data": {
-    "path": "data"
+    "path": "shared"
   },
   "backend": {
     "auth": {

@@ -2,7 +2,6 @@
 
 import {RedisClient} from "redis";
 import * as restify from "restify";
-import INodeConfig from "./src/interface/nodeConfig";
 import {logger, LogType} from "./src/logger";
 import {MasterRouter} from "./src/masterRouter";
 import uploadMiddleware from "./src/middleware/uploadMiddleware";

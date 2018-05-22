@@ -3,9 +3,15 @@
 import * as crypto from "crypto";
 import {NotFoundError} from "restify-errors";
 import {promisify} from "util";
+import {v4} from "uuid";
 import {IUserRequest} from "../controller/request/userRequest";
+import {EntryShare, EntryType} from "../interface/entry";
+import IEntry from "../interface/entry";
+import LocationStatus from "../interface/locationStatus";
+import INode from "../interface/node";
 import IUser from "../interface/user";
 import CassandraRepository from "../repository/cassandra";
+import AbstractEntryService from "./abstractEntryService";
 import GroupService from "./groupService";
 
 const randomBytesAsync = promisify(crypto.randomBytes);
@@ -21,10 +27,12 @@ export default class UserService {
     };
   }
 
+  private readonly node: INode;
   private readonly repository: CassandraRepository;
   private readonly groupService: GroupService;
 
-  constructor(repository: CassandraRepository, groupService: GroupService) {
+  constructor(node: INode, repository: CassandraRepository, groupService: GroupService) {
+    this.node = node;
     this.repository = repository;
     this.groupService = groupService;
   }
@@ -71,6 +79,7 @@ export default class UserService {
     );
 
     await this.createEntryTable(user.id);
+    await this.createRootPath(user.id);
 
     return user;
   }
@@ -128,11 +137,39 @@ export default class UserService {
     }
   };
 
+  private createRootPath = async (id: number): Promise<void> => {
+    const locationSet = [this.node.uid].map(it => it + AbstractEntryService.DELIMITER + LocationStatus.EXISTS);
+    const timestamp = new Date().getTime();
+    const entry: IEntry = {
+      child: [],
+      created: timestamp,
+      filetype: null,
+      group: null,
+      lastModify: timestamp,
+      location: locationSet,
+      locationPath: `${id}`,
+      owner: id,
+      parent: null,
+      path: "/",
+      permission: "640",
+      share: EntryShare.NONE,
+      type: EntryType.DIRECTORY,
+      uuid: v4(),
+    };
+    const query = `INSERT INTO entry_${id} (
+        uuid, type, filetype, parent, child, path, owner, group, permission, share, created, last_modify, size,
+        location, location_path) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`;
+    await this.repository.client.execute(query,
+        [entry.uuid, entry.type, entry.filetype, entry.parent, entry.child, entry.path,
+          entry.owner, entry.group, entry.permission, entry.share, entry.created, entry.lastModify, entry.size,
+          entry.location, entry.locationPath],
+        {prepare: true});
+  };
+
   private createEntryTable = async (id: number): Promise<void> => {
     const createTable = `
       CREATE TABLE IF NOT EXISTS discloud.entry_${id} (
           uuid uuid PRIMARY KEY,
-          name text,
           type text,
           filetype text,
           parent uuid,

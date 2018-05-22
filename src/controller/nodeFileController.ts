@@ -3,6 +3,7 @@
 import * as path from "path";
 import * as restify from "restify";
 import {NodeUnavailableError} from "../error";
+import IEntry from "../interface/entry";
 import INode from "../interface/node";
 import AbstractEntryService from "../service/abstractEntryService";
 import RegistryService from "../service/registryService";
@@ -28,17 +29,24 @@ export default class NodeFileController {
     const splitPath = entry.path.split("/").filter(it => it !== "");
     const redirectUrl = [this.getNodePath(targetNode), "data", req.params.userid];
     if (splitPath.length) redirectUrl.push(...splitPath);
-    redirectUrl.push(entry.name);
     return res.redirect(303, redirectUrl.join("/"), next);
   };
 
   public getByPath = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
-    const entry = await this.entryService.getByPath(req.params.userid, req.params.path);
-    return res.redirect(303, path.resolve("data", req.params.userid, entry.path, entry.name), next);
+    let entry: IEntry;
+    entry = await this.entryService.getByPath(req.params.userid, "/" + req.params["*"]);
+    if (!entry) {
+      entry = await this.entryService.getByPath(req.params.userid, this.convertPath(req.params["*"]));
+    }
+    return res.redirect(303, path.resolve("data", req.params.userid, entry.path), next);
   };
 
   private getNodePath = (node: INode): string => {
     return node.protocol + "://" + (node.host || node.ipv4) + ":" + node.port;
+  };
+
+  private convertPath = (urlPath: string) => {
+    return path.dirname(urlPath) === "." ? "/" : "/" + path.dirname(urlPath);
   };
 
   private getTargetNode = async (uids: string[]): Promise<INode> => {

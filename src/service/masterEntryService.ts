@@ -1,8 +1,9 @@
 "use strict";
 
+import * as path from "path";
 import {RedisClient} from "redis";
 import {NotFoundError} from "restify-errors";
-import v4 = require("uuid/v4");
+import {v4} from "uuid";
 import {IEntryRequest} from "../controller/request/entryRequest";
 import {NodeUnavailableError, ParentPathNotExists} from "../error";
 import IEntry, {EntryType} from "../interface/entry";
@@ -36,6 +37,12 @@ export default class MasterEntryService extends AbstractEntryService {
   }
 
   public save = async (id: number, entryRequest: IEntryRequest) => {
+    const user = await this.userService.findById(entryRequest.owner);
+    if (!user) throw new NotFoundError("Owner: user {%s} not found", entryRequest.owner);
+
+    const group = await this.groupService.findById(entryRequest.group);
+    if (!group) throw new NotFoundError("Group: group {%s} not found", entryRequest.group);
+
     const nodesAvailable = await this.checkNodesAvailable(entryRequest.location);
     const nodesUnavailable = Array.from(nodesAvailable.entries())
         .map(it => ({uid: it[0], alive: it[1]}))
@@ -46,21 +53,19 @@ export default class MasterEntryService extends AbstractEntryService {
 
     const locationSet = Array.from(nodesAvailable.entries())
         .map(it => {
-          return it[0] === this.node.uid
-              ? it[0] + AbstractEntryService.DELIMITER + LocationStatus.RESERVED
-              : it[0] + AbstractEntryService.DELIMITER + LocationStatus.CREATED;
+          if (entryRequest.type === EntryType.DIRECTORY) {
+            return it[0] + AbstractEntryService.DELIMITER + LocationStatus.EXISTS;
+          } else {
+            return it[0] === this.node.uid
+                ? it[0] + AbstractEntryService.DELIMITER + LocationStatus.RESERVED
+                : it[0] + AbstractEntryService.DELIMITER + LocationStatus.CREATED;
+          }
         });
 
-    const user = await this.userService.findById(entryRequest.owner);
-    if (!user) throw new NotFoundError("Owner: user {%s} not found", entryRequest.owner);
+    const parentUuid = await this.getParentUuid(id, entryRequest.path);
+    if (!parentUuid) throw new ParentPathNotExists("Entry: parent path not exist");
 
-    const group = await this.groupService.findById(entryRequest.group);
-    if (!group) throw new NotFoundError("Group: group {%s} not found", entryRequest.group);
-
-    const parentPathExists = await this.checkParentPath(id, entryRequest.path);
-    if (!parentPathExists) throw new ParentPathNotExists("Entry: parent path not exist");
-
-    const locationPath = [id, entryRequest.path, entryRequest.name].join("/").replace(/\/+/g, "/");
+    const locationPath = [id, entryRequest.path].join("/").replace(/\/+/g, "/");
 
     const timestamp = new Date().getTime();
     const entry: IEntry = {
@@ -71,9 +76,8 @@ export default class MasterEntryService extends AbstractEntryService {
       lastModify: timestamp,
       location: locationSet,
       locationPath,
-      name: entryRequest.name,
       owner: entryRequest.owner,
-      parent: entryRequest.parent,
+      parent: parentUuid,
       path: entryRequest.path,
       permission: entryRequest.permission,
       share: entryRequest.share,
@@ -81,18 +85,22 @@ export default class MasterEntryService extends AbstractEntryService {
       uuid: v4(),
     };
     const query = `INSERT INTO entry_${id} (
-        uuid, name, type, filetype, parent, child, path, owner, group, permission, share, created, last_modify, size,
-        location, location_path) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`;
+        uuid, type, filetype, parent, child, path, owner, group, permission, share, created, last_modify, size,
+        location, location_path) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);`;
     await this.repository.client.execute(query,
-        [entry.uuid, entry.name, entry.type, entry.filetype, entry.parent, entry.child, entry.path,
+        [entry.uuid, entry.type, entry.filetype, entry.parent, entry.child, entry.path,
           entry.owner, entry.group, entry.permission, entry.share, entry.created, entry.lastModify, entry.size,
           entry.location, entry.locationPath],
         {prepare: true},
     );
+    const parentUpdateQuery = `UPDATE entry_${entry.owner} SET child = child + ? WHERE uuid = ?;`;
+    await this.repository.client.execute(parentUpdateQuery, [[entry.uuid], parentUuid], {prepare: true});
 
-    this.pubEntryService.publish({
-      location: locationSet, locationPath: entry.locationPath, owner: entry.owner, uuid: entry.uuid,
-    });
+    if (entry.type === EntryType.FILE) {
+      this.pubEntryService.publish({
+        location: locationSet, locationPath: entry.locationPath, owner: entry.owner, uuid: entry.uuid,
+      });
+    }
 
     return entry;
   };
@@ -102,9 +110,9 @@ export default class MasterEntryService extends AbstractEntryService {
     await this.repository.client.execute(query, [uuid], {prepare: true});
   };
 
-  public deleteByPath = async (id: number, path: string): Promise<void> => {
+  public deleteByPath = async (id: number, pathName: string): Promise<void> => {
     const query = `DELETE FROM entry_${id} WHERE path = ?;`;
-    await this.repository.client.execute(query, [path], {prepare: true});
+    await this.repository.client.execute(query, [pathName], {prepare: true});
   };
 
   private checkNodesAvailable = async (uids: string[]): Promise<Map<string, boolean>> => {
@@ -116,11 +124,11 @@ export default class MasterEntryService extends AbstractEntryService {
     return nodeMap;
   };
 
-  private checkParentPath = async (id: number, path: string): Promise<boolean> => {
-    const splitPath = path.split("/");
-    if (splitPath.length <= 2) return true;
+  private getParentUuid = async (id: number, pathName: string): Promise<string> => {
+    const dirname = path.dirname(pathName) === "." ? "/" : path.dirname(pathName);
     const query = `SELECT * FROM entry_${id} WHERE path = ?;`;
-    const resultSet = await this.repository.client.execute(query, [splitPath.slice(-2, -1)], {prepare: true});
-    return resultSet.first() !== undefined;
+    const resultSet = await this.repository.client.execute(query, [dirname], {prepare: true});
+    if (!resultSet.first()) return undefined;
+    else return AbstractEntryService.convertRow(resultSet.first()).uuid;
   };
 }

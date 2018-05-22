@@ -2,13 +2,14 @@
 
 import * as fs from "fs";
 import * as fse from "fs-extra";
-import * as http from "http";
 import * as path from "path";
+import * as request from "request";
 import {NotFoundError} from "restify-errors";
+import IEntry from "../interface/entry";
 import LocationStatus from "../interface/locationStatus";
 import INode from "../interface/node";
 import IPubEntry from "../interface/pubEntry";
-import IPubFile from "../interface/pubFile";
+import IPubFile, {OperationEnum} from "../interface/pubFile";
 import CassandraRepository from "../repository/cassandra";
 import AbstractEntryService from "./abstractEntryService";
 import AbstractFileService from "./abstractFileService";
@@ -43,20 +44,12 @@ export default class SlaveFileService extends AbstractFileService {
         throw new NotFoundError("Entry by uuid + '{" + file.uuid + "}' not found");
       }
       const entry = AbstractEntryService.convertRow(resultSet.first());
-      const locationPath = entry.locationPath.split("/");
-      const locationDirectory = entry.locationPath.split("/").slice(0, locationPath.length - 1);
-
-      await fse.ensureDir(path.join(this.rootPath, ...locationDirectory));
-
-      const writeStream = fs.createWriteStream(path.join(this.rootPath, ...locationPath));
-      http.get({
-        host: file.origin.host || file.origin.ipv4,
-        path: `/upload/${entry.owner}/${entry.uuid}`,
-        port: file.origin.port,
-        protocol: file.origin.protocol,
-      }, (res) => {
-        res.pipe(writeStream);
-      });
+      switch (file.operation) {
+        case OperationEnum.SAVE:
+          return this.saveFile(file, entry);
+        case OperationEnum.DELETE:
+          return this.deleteFile(file, entry);
+      }
     }
   };
 
@@ -64,4 +57,32 @@ export default class SlaveFileService extends AbstractFileService {
     this.subEntryService.unsubscribe();
     this.subFileService.unsubscribe();
   };
+
+  private saveFile = async (file: IPubFile, entry: IEntry): Promise<void> => {
+    const locationPath = entry.locationPath.split("/");
+    const locationDirectory = entry.locationPath.split("/").slice(0, locationPath.length - 1);
+
+    await fse.ensureDir(path.join(this.rootPath, ...locationDirectory));
+    await this.writeStream(file.origin, `/upload/${entry.owner}/${entry.uuid}`, locationPath);
+
+    await this.updateLocationStatus(entry, LocationStatus.RESERVED, LocationStatus.EXISTS);
+  };
+
+  private deleteFile = async (file: IPubFile, entry: IEntry): Promise<void> => {
+    const locationPath = entry.locationPath.split("/");
+    await fse.unlink(path.join(this.rootPath, ...locationPath));
+
+    await this.updateLocationStatus(entry, LocationStatus.EXISTS, LocationStatus.DELETED);
+  };
+
+  private writeStream = (node: INode, urlPath: string, locationPath: string[]) => new Promise((resolve) => {
+    const writeStream = fs.createWriteStream(path.join(this.rootPath, ...locationPath));
+    writeStream.on("close", () => {
+      resolve();
+    });
+    request.get({
+      followRedirect: true,
+      uri: node.protocol + "://" + (node.host || node.ipv4) + ":" + node.port + urlPath,
+    }).pipe(writeStream);
+  });
 }

@@ -9,7 +9,7 @@ import {NotFoundError} from "restify-errors";
 import {promisify} from "util";
 import LocationStatus from "../interface/locationStatus";
 import INode from "../interface/node";
-import IPubFile from "../interface/pubFile";
+import IPubFile, {OperationEnum} from "../interface/pubFile";
 import CassandraRepository from "../repository/cassandra";
 import AbstractEntryService from "./abstractEntryService";
 import AbstractFileService from "./abstractFileService";
@@ -44,7 +44,7 @@ export default class MasterFileService extends AbstractFileService {
     });
     await Promise.all(renameFilePromises);
 
-    await this.updateLocationStatus(entry, LocationStatus.RESERVED, LocationStatus.CREATED);
+    await this.updateLocationStatus(entry, LocationStatus.RESERVED, LocationStatus.EXISTS);
     const location = entry.location
         .map(it => {
           const node = AbstractEntryService.extendLocation(it);
@@ -54,6 +54,7 @@ export default class MasterFileService extends AbstractFileService {
 
     this.pubFileService.publish({
       location,
+      operation: OperationEnum.SAVE,
       origin: this.node,
       size: entry.size,
       userId: options.userId,

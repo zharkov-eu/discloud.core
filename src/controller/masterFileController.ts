@@ -1,6 +1,7 @@
 "use strict";
 
 import * as restify from "restify";
+import {NotFoundError} from "restify-errors";
 import INode from "../interface/node";
 import AbstractEntryService from "../service/abstractEntryService";
 import MasterFileService from "../service/masterFileService";
@@ -18,10 +19,12 @@ export default class MasterFileController {
 
   public getByUuidMaster = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
     const entry = await this.entryService.getByUUID(req.params.userid, req.params.entryuid);
+    if (!entry) {
+      return next(new NotFoundError("Entry by uuid '{%s}' not found", req.params.entryuid));
+    }
     const splitPath = entry.path.split("/").filter(it => it !== "");
     const redirectUrl = [this.baseUrl, "data", req.params.userid];
     if (splitPath.length) redirectUrl.push(...splitPath);
-    redirectUrl.push(entry.name);
     return res.redirect(303, redirectUrl.join("/"), next);
   };
 

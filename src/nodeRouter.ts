@@ -39,7 +39,7 @@ export function NodeRouter(server: restify.Server, options: IRouterOptions) {
   addRoute("get", "/node/current", nodeController.get);
 
   addRoute("get", "/file/:userid(\\d+)/uuid/:uuid", fileController.getByUuid);
-  addRoute("get", "/file/:userid(\\d+)/path/:path(.*)", fileController.getByPath);
+  addRoute("get", "/file/:userid(\\d+)/path/*", fileController.getByPath);
 
   addRoute("get", "/entry/:userid(\\d+)/entry", entryController.getEntries);
   addRoute("get", "/entry/:userid(\\d+)/entry/:uuid", entryController.getEntry);

@@ -40,7 +40,6 @@ export default class EntryResponse implements IEntryResponse {
     this.group = entry.group;
     this.lastModify = entry.lastModify;
     this.location = entry.location;
-    this.name = entry.name;
     this.owner = entry.owner;
     this.path = entry.path;
     this.permission = entry.permission;

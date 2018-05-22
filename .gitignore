@@ -70,5 +70,6 @@ typings/
 # .DS_Store
 .DS_Store
 
-# Data dir
+# Data/Shared dir
 data
+shared

@@ -20,7 +20,6 @@ export default class MasterEntryController {
     const entryRequest = new EntryRequest(req.body, {
       group: "required" as any,
       location: "required" as any,
-      name: "required" as any,
       owner: "required" as any,
       path: "required" as any,
       permission: "required" as any,

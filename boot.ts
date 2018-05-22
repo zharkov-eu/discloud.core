@@ -101,7 +101,7 @@ export const init = (options: IBootOptions) => {
     const uid = await node.register();
 
     const groupService = new GroupService(repository);
-    const userService = new UserService(repository, groupService);
+    const userService = new UserService(node.getNodeInfo(), repository, groupService);
 
     const slaveEntryService = new SlaveEntryService(repository);
     const slaveFileService = new SlaveFileService(node.getNodeInfo(), repository);

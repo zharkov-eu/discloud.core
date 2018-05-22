@@ -25,7 +25,6 @@ export default abstract class AbstractEntryService {
     lastModify: row.last_modify,
     location: row.location,
     locationPath: row.location_path,
-    name: row.name,
     owner: row.owner,
     parent: row.parent,
     path: row.path,

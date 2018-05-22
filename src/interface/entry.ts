@@ -6,12 +6,12 @@ export enum EntryType {
 }
 
 export enum EntryShare {
-  LINK = "link",
+  NONE = "n",
+  LINK = "l",
 }
 
 export default interface IEntry {
   uuid: string; // UUID v4
-  name: string; // Entry Name
   type: EntryType; // Entry type
   filetype?: string; // File Type
   parent: string; // Parent UUID
