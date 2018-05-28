@@ -10,7 +10,7 @@ import MasterFileService from "./service/masterFileService";
 import RegistryService from "./service/registryService";
 import UserService from "./service/userService";
 
-import IUploadRequest from "./backend/statistics/IUploadRequest";
+import IUploadRequest from "./backend/statistics/interface/IUploadRequest";
 import GroupController from "./controller/groupController";
 import MasterEntryController from "./controller/masterEntryController";
 import MasterFileController from "./controller/masterFileController";

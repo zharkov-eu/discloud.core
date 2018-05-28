@@ -2,7 +2,7 @@
 
 import * as restify from "restify";
 import {BadRequestError, ConflictError, NotFoundError} from "restify-errors";
-import IUploadRequest from "../backend/statistics/IUploadRequest";
+import IUploadRequest from "../backend/statistics/interface/IUploadRequest";
 import MasterEntryService from "../service/masterEntryService";
 import QueueService from "../service/queueService";
 import UserService from "../service/userService";
