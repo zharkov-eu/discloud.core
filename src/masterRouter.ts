@@ -10,12 +10,14 @@ import MasterFileService from "./service/masterFileService";
 import RegistryService from "./service/registryService";
 import UserService from "./service/userService";
 
+import IUploadRequest from "./backend/statistics/IUploadRequest";
 import GroupController from "./controller/groupController";
 import MasterEntryController from "./controller/masterEntryController";
 import MasterFileController from "./controller/masterFileController";
 import UserController from "./controller/userController";
 import INode from "./interface/node";
 import asyncWrapper from "./lib/asyncWrapper";
+import QueueService from "./service/queueService";
 
 interface IRouterOptions {
   groupService: GroupService;
@@ -32,10 +34,11 @@ export function MasterRouter(server: restify.Server, options: IRouterOptions) {
     throw new Error("MasterRouter options is not a object");
   }
 
+  const queueService = new QueueService<IUploadRequest>(options.redisClient, {name: "uploadrequest"});
   const entryService = new MasterEntryService(options.node, options.repository, options.redisClient,
       options.registryService, options.groupService, options.userService);
 
-  const entryController = new MasterEntryController(entryService, options.userService);
+  const entryController = new MasterEntryController(entryService, options.userService, queueService);
   const fileController = new MasterFileController(options.node, entryService, options.masterFileService);
   const groupController = new GroupController(options.groupService);
   const userController = new UserController(options.userService);

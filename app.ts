@@ -2,8 +2,10 @@
 
 import {RedisClient} from "redis";
 import * as restify from "restify";
+import IProxyUser from "./src/interface/proxyUser";
 import {logger, LogType} from "./src/logger";
 import {MasterRouter} from "./src/masterRouter";
+import proxyAuthMiddleware from "./src/middleware/proxyAuthMiddleware";
 import uploadMiddleware from "./src/middleware/uploadMiddleware";
 import {NodeRouter} from "./src/nodeRouter";
 import NodeWorker from "./src/nodeWorker";
@@ -14,6 +16,9 @@ import RegistryService from "./src/service/registryService";
 import SlaveEntryService from "./src/service/slaveEntryService";
 import SlaveFileService from "./src/service/slaveFileService";
 import UserService from "./src/service/userService";
+
+// noinspection TsLint
+const proxyUsers: IProxyUser[] = require("./config/auth.json");
 
 interface IAppServices {
   groupService: GroupService;
@@ -60,6 +65,7 @@ export class App {
 
     this.server.use(restify.plugins.acceptParser(this.server.acceptable));
     this.server.use(restify.plugins.queryParser());
+    this.server.use(proxyAuthMiddleware(proxyUsers));
     this.server.use(uploadMiddleware(this.repository));
     this.server.use(restify.plugins.bodyParser({
       hash: "md5",

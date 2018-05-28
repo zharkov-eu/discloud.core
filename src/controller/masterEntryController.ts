@@ -2,7 +2,9 @@
 
 import * as restify from "restify";
 import {BadRequestError, ConflictError, NotFoundError} from "restify-errors";
+import IUploadRequest from "../backend/statistics/IUploadRequest";
 import MasterEntryService from "../service/masterEntryService";
+import QueueService from "../service/queueService";
 import UserService from "../service/userService";
 import EntryRequest from "./request/entryRequest";
 import EntryResponse, {IEntryResponseOptions} from "./request/entryResponse";
@@ -10,10 +12,12 @@ import EntryResponse, {IEntryResponseOptions} from "./request/entryResponse";
 export default class MasterEntryController {
   private readonly entryService: MasterEntryService;
   private readonly userService: UserService;
+  private readonly queueService: QueueService<IUploadRequest>;
 
-  constructor(entryService: MasterEntryService, userService: UserService) {
+  constructor(entryService: MasterEntryService, userService: UserService, queueService: QueueService<IUploadRequest>) {
     this.entryService = entryService;
     this.userService = userService;
+    this.queueService = queueService;
   }
 
   public post = async (req: restify.Request, res: restify.Response, next: restify.Next) => {
@@ -39,6 +43,8 @@ export default class MasterEntryController {
     const entryResponseOptions: IEntryResponseOptions = {
       upload: `/upload/${req.params.userid}/${entry.uuid}`,
     };
+
+    await this.queueService.enqueue({username: user.username, encrypted: false, size: 0});
 
     return res.json(201, new EntryResponse(entry, entryResponseOptions), {Location: entryResponseOptions.upload});
   };
