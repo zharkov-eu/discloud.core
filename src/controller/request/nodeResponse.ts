@@ -10,6 +10,9 @@ const NodeRoleEnumMapping: { [key: string]: "master" | "slave" } = {
 export interface INodeResponse {
   uid: string;
   ipv4: string;
+  host: string;
+  protocol: string;
+  port: number;
   role: "master" | "slave";
   zone: string;
 }
@@ -17,13 +20,19 @@ export interface INodeResponse {
 export default class NodeResponse implements INodeResponse {
   public uid: string;
   public ipv4: string;
+  public host: string;
+  public protocol: string;
+  public port: number;
   public role: "master" | "slave";
   public zone: string;
 
   constructor(node: INode) {
-    this.ipv4 = node.ipv4;
-    this.role = NodeRoleEnumMapping[node.role];
     this.uid = node.uid;
+    this.ipv4 = node.ipv4;
+    this.host = node.host;
+    this.protocol = node.protocol;
+    this.port = node.port;
+    this.role = NodeRoleEnumMapping[node.role];
     this.zone = node.zone;
   }
 }

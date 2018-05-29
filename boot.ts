@@ -93,7 +93,7 @@ export const init = (options: IBootOptions) => {
     const node = new NodeWorker(client, repository, {
       host: nodeConfig.host,
       ipv4: nodeConfig.bindIp,
-      port: nodeConfig.port,
+      port: options.port || nodeConfig.port,
       protocol: nodeConfig.protocol,
       uid: nodeConfig.uid,
       zone: nodeConfig.zone,
